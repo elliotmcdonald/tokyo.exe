@@ -269,11 +269,15 @@ const SFX={intro:()=>{[NT.C4,NT.E4,NT.G4,NT.B4,NT.D5].forEach((f,i)=>ep(f,i*.11,
   open:()=>{soft(r6(196),0,.045,.4);soft(r6(NT.G4/1.0),.05,.03,.45)},
   add:()=>{ep(NT.C4,0,.06,.9);ep(NT.E4,.09,.06,.9);ep(NT.G4,.18,.055,1.2)},
   undo:()=>{soft(NT.E4,0,.045,.35);soft(NT.C4,.09,.045,.45)},
-  stamp:()=>{const a=ac(),t=a.currentTime+.5;
-    const o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(52,t+.13);const g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.17,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.24);o.connect(g).connect(M);o.start(t);o.stop(t+.27);
-    const len=Math.floor(a.sampleRate*.11),nb=a.createBuffer(1,len,a.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<len;i++)nd[i]=(Math.random()*2-1)*Math.pow(1-i/len,4);
-    const src=a.createBufferSource();src.buffer=nb;const fl=a.createBiquadFilter();fl.type='lowpass';fl.frequency.value=650;const g2=a.createGain();g2.gain.value=.14;src.connect(fl).connect(g2).connect(M);src.start(t);
-    soft(NT.G4,.68,.028,.6);soft(NT.C5,.77,.024,.75)},
+  stamp:()=>{const a=ac(),T=a.currentTime+.52;
+    const burst=(t,dur,type,freq,q,vol)=>{const len=Math.floor(a.sampleRate*dur),nb=a.createBuffer(1,len,a.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<len;i++)nd[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+      const src=a.createBufferSource();src.buffer=nb;const fl=a.createBiquadFilter();fl.type=type;fl.frequency.value=freq;fl.Q.value=q;const g=a.createGain();g.gain.value=vol;src.connect(fl).connect(g).connect(M);src.start(t)};
+    const sub=(t,f0,f1,vol,dur)=>{const o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur*.6);const g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(M);o.start(t);o.stop(t+dur+.02)};
+    burst(T-.004,.012,'bandpass',1700,2.5,.06);          // rubber touching paper
+    burst(T,.09,'bandpass',380,5,.9);                     // woody thock of the handle
+    sub(T,120,44,.26,.32);                                // weight into the table
+    burst(T+.075,.05,'bandpass',520,5,.28);sub(T+.075,95,60,.06,.12);  // tiny rebound
+    [NT.C4,NT.E4,NT.G4,NT.C5].forEach((f,i)=>ep(f,.72+i*.045,.042,1.5))},
   grant:()=>{ep(130.81,0,.16,1.4);ep(NT.C4,.0,.08,1.6);[NT.E4,NT.G4,NT.C5,NT.E5].forEach((f,i)=>ep(f,.08+i*.06,.07,1.8))}};
 window.__snd={SFX,reset:()=>{AC=null;for(const k in KS)delete KS[k]}};
 const sfx=k=>{if(!st.snd)return;try{if(AC&&AC.state==='suspended')AC.resume();SFX[k]()}catch(e){}};
@@ -529,7 +533,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
     if(p.custom){const i=st.custom.indexOf(p);st.custom.splice(i,1);save();shut();sel=null;refresh();toast('spot deleted',()=>{st.custom.splice(i,0,p);save();refresh()})}
     else{st.hidden[p.id]=1;save();shut();sel=null;refresh();toast('spot hidden',()=>{delete st.hidden[p.id];save();refresh()})}}}
 function slam(p){const c=CATS[p.c]||CATS.sights,d=document.createElement('div');d.className='slam';d.innerHTML=`${c.k}<small>${dlong(tnow().iso)}</small>`;app.appendChild(d);sfx('stamp');
-  d.animate([{transform:'scale(1.8) rotate(-18deg)',opacity:0},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.35},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.8},{transform:'scale(1) rotate(-8deg)',opacity:0}],{duration:1500,easing:'steps(12)',fill:'forwards'}).onfinish=()=>d.remove()}
+  setTimeout(()=>{try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}app.animate([{transform:'translate(0,0)'},{transform:'translate(0,3px)'},{transform:'translate(0,-1px)'},{transform:'translate(0,0)'}],{duration:170,easing:'ease-out'})},520);d.animate([{transform:'scale(1.8) rotate(-18deg)',opacity:0},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.35},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.8},{transform:'scale(1) rotate(-8deg)',opacity:0}],{duration:1500,easing:'steps(12)',fill:'forwards'}).onfinish=()=>d.remove()}
 function stampBook(){sfx('open');const all=allSpots(),done=all.filter(p=>st.stamps[p.id]).sort((a,b)=>st.stamps[a.id]<st.stamps[b.id]?-1:1),n=all.length,seg=Math.min(n,40),on=done.length?Math.max(1,Math.round(done.length/Math.max(1,n)*seg)):0;
   openSh(`<div class="row2" style="margin-top:0"><span class="st" style="margin:0">stamp book</span><span class="dt">${done.length} of ${n}</span></div>
     <div class="prog" style="grid-template-columns:repeat(${seg},1fr)">${Array.from({length:seg},(_,i)=>`<i style="${i<on?'background:var(--gold)':''}"></i>`).join('')}</div>
