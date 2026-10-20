@@ -233,24 +233,32 @@ const byId=id=>SPOTS.find(p=>p.id===id)||st.custom.find(p=>p.id===id);
 /* ---------- sound: buttery — warm, round electric-piano tones, no noise ---------- */
 let AC,M;const KS={};
 function ac(){if(AC)return AC;AC=new(window.AudioContext||window.webkitAudioContext)();M=AC.createGain();M.gain.value=1;
-  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2400;lp.Q.value=.2;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;lp.Q.value=.2;
   const cp=AC.createDynamicsCompressor();cp.threshold.value=-18;cp.ratio.value=2.5;cp.knee.value=12;
   const dl=AC.createDelay();dl.delayTime.value=.16;const fb=AC.createGain();fb.gain.value=.12;const wet=AC.createGain();wet.gain.value=.25;const dlp=AC.createBiquadFilter();dlp.type='lowpass';dlp.frequency.value=1400;
   M.connect(lp);lp.connect(cp);lp.connect(dl);dl.connect(dlp);dlp.connect(fb);fb.connect(dl);dlp.connect(wet);wet.connect(cp);cp.connect(AC.destination);return AC}
 /* a soft rhodes-like note: sine body + gentle bell partial + slow vibrato-free decay */
-function ep(f,t0=0,v=.1,du=1.1){const a=ac(),t=a.currentTime+t0,g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(v*.35,t+.18);g.gain.exponentialRampToValueAtTime(.0001,t+du);g.connect(M);
+function ep(f,t0=0,v=.1,du=1.1){const a=ac(),t=a.currentTime+t0,g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.025);g.gain.exponentialRampToValueAtTime(v*.35,t+.18);g.gain.exponentialRampToValueAtTime(.0001,t+du);g.connect(M);
   const o=a.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);
   const o2=a.createOscillator();o2.type='sine';o2.frequency.value=f*1.003;const g2=a.createGain();g2.gain.value=.5;o2.connect(g2).connect(g);
-  const md=a.createOscillator();md.frequency.value=f*2;const mg=a.createGain();mg.gain.setValueAtTime(f*.9,t);mg.gain.exponentialRampToValueAtTime(f*.02,t+.25);md.connect(mg).connect(o.frequency);
+  const md=a.createOscillator();md.frequency.value=f*2;const mg=a.createGain();mg.gain.setValueAtTime(f*.28,t);mg.gain.exponentialRampToValueAtTime(f*.01,t+.2);md.connect(mg).connect(o.frequency);
   [o,o2,md].forEach(x=>{x.start(t);x.stop(t+du+.05)})}
 const r6=f=>f*(1+(Math.random()-.5)*.02);
+function soft(f,t0=0,v=.04,du=.22){const a=ac(),t=a.currentTime+t0,g=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+du);g.connect(lp);lp.connect(M);
+  const o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(f*1.04,t);o.frequency.exponentialRampToValueAtTime(f,t+.05);o.connect(g);
+  const o2=a.createOscillator();o2.type='triangle';o2.frequency.value=f/2;const g2=a.createGain();g2.gain.value=.35;o2.connect(g2).connect(g);
+  [o,o2].forEach(x=>{x.start(t);x.stop(t+du+.05)})}
+/* taps wander softly around a low pentatonic scale so they never repeat the same note */
+const TAPS=[196,220,261.63,293.66,329.63];let tapI=2,sndLast=0;
+function tapNote(){tapI=Math.max(0,Math.min(TAPS.length-1,tapI+[-1,1,-1,1,0][Math.floor(Math.random()*5)]));return TAPS[tapI]}
 const NT={C4:261.63,E4:329.63,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,G5:783.99};
 const SFX={intro:()=>{[NT.C4,NT.E4,NT.G4,NT.B4,NT.D5].forEach((f,i)=>ep(f,i*.11,.085,2.2));ep(NT.G5,.62,.05,2.4)},
-  tap:()=>ep(r6(NT.G5),0,.045,.28),
-  pop:()=>ep(r6(NT.E5),0,.09,.7),
-  open:()=>{ep(NT.C5,0,.07,.8);ep(NT.G5,.06,.05,.9)},
-  add:()=>{ep(NT.C5,0,.08,.9);ep(NT.E5,.09,.08,.9);ep(NT.G5,.18,.07,1.2)},
-  undo:()=>{ep(NT.E5,0,.07,.6);ep(NT.C5,.1,.07,.8)},
+  tap:()=>{const n=performance.now();if(n-sndLast<90)return;sndLast=n;soft(tapNote(),0,.035,.2)},
+  pop:()=>soft(r6(NT.C4),0,.05,.35),
+  open:()=>{soft(r6(196),0,.045,.4);soft(r6(NT.G4/1.0),.05,.03,.45)},
+  add:()=>{ep(NT.C4,0,.06,.9);ep(NT.E4,.09,.06,.9);ep(NT.G4,.18,.055,1.2)},
+  undo:()=>{soft(NT.E4,0,.045,.35);soft(NT.C4,.09,.045,.45)},
   grant:()=>{ep(130.81,0,.16,1.4);ep(NT.C4,.0,.08,1.6);[NT.E4,NT.G4,NT.C5,NT.E5].forEach((f,i)=>ep(f,.08+i*.06,.07,1.8))}};
 window.__snd={SFX,reset:()=>{AC=null;for(const k in KS)delete KS[k]}};
 const sfx=k=>{if(!st.snd)return;try{if(AC&&AC.state==='suspended')AC.resume();SFX[k]()}catch(e){}};
