@@ -207,7 +207,7 @@ const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1]
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={map:'sencha',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
+let st={map:'kinari',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
 let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},150);syncSoon()};
@@ -288,8 +288,8 @@ $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
 const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl');
-const THEMES={sencha:'#6AACD9',kinari:'#9DB5BC',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',moss:'#5D99A8',washi:'#8EC1D6',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
-if(!THEMES[st.map]||!st.mapPicked)st.map='sencha';
+const THEMES={kinari:'#9DB5BC',sencha:'#6AACD9',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',moss:'#5D99A8',washi:'#8EC1D6',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
+if(!THEMES[st.map]||!st.mapPicked||st.mapV!==2){st.map='kinari';st.mapV=2}
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toP=(lat,lng)=>{const [x,y]=toM(lat,lng);return[Math.max(12,Math.min(PJ.W-12,x)),Math.max(28,Math.min(PJ.H-6,y))]};
