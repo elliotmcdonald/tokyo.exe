@@ -47,14 +47,18 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .lb.mj{font-size:11px;background:rgba(37,27,35,.85)}
 .lb.lm{transform:translate(-50%,calc(-100% - 6px));color:var(--gold);background:rgba(37,27,35,.8)}.lb.lm::after{top:auto;bottom:-5px;background:var(--gold)}
 .lb::after{content:'';position:absolute;left:50%;top:-5px;width:3px;height:3px;margin-left:-1px;background:var(--fg)}
-.pin{position:absolute;left:0;top:0;width:21px;height:24px;margin:-24px 0 0 -10px;transition:none}
+.pin{position:absolute;left:0;top:0;width:30px;height:30px;margin:-26px 0 0 -15px;transition:none}
+.pin img,.clu img{display:block;width:100%;height:100%;image-rendering:pixelated;-webkit-user-drag:none}
+.pin.st::after{content:'✦';position:absolute;right:-5px;bottom:-1px;font-size:11px;line-height:1;color:#E8B547;text-shadow:0 0 2px #251B23,0 0 2px #251B23}
 .pin svg{display:block}
 .dot{position:absolute;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;box-shadow:0 0 0 2px #251B23,2px 3px 0 1px rgba(0,0,0,.18)}
 .dot.st::after{content:'';position:absolute;inset:3px;background:#E8B547}
-.clu{position:absolute;left:0;top:0;height:24px;min-width:24px;padding:0 5px;margin:-12px 0 0 -12px;background:#251B23;color:#F2E4EA;font-size:12px;letter-spacing:0;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 rgba(0,0,0,.22)}
-.clu i{position:absolute;left:0;right:0;bottom:-3px;height:3px;display:flex}.clu i b{flex:1 1 0;display:block}
-.pin.sm{width:15px;height:17px;margin:-17px 0 0 -7px}.pin.sm svg{width:15px;height:17px}
-.pin.sel{z-index:3}.pin.sel svg{width:30px;height:34px}.pin.sel{width:30px;height:34px;margin:-34px 0 0 -15px}
+.clu{position:absolute;left:0;top:0;width:30px;height:30px;margin:-26px 0 0 -15px}
+.clu b{position:absolute;right:-9px;top:-7px;min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#251B23;color:#F2E4EA;font-weight:400;font-size:10px;line-height:17px;text-align:center;box-shadow:0 0 0 1.5px #F2E4EA}
+
+
+.pin.sel{z-index:3;width:45px;height:45px;margin:-40px 0 0 -22px}
+.ri{width:30px;height:30px;flex:none;image-rendering:pixelated;margin:-4px 0}
 .ptag{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-4px);background:var(--bg);color:var(--fg);font-size:11px;letter-spacing:1px;padding:4px 7px;white-space:nowrap;box-shadow:2px 2px 0 var(--bg2)}
 .you{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;background:#5AA9FF;border:2px solid #fff;box-shadow:0 0 0 0 rgba(90,169,255,.6);animation:pulse 1.6s steps(6) infinite}
 @keyframes pulse{to{box-shadow:0 0 0 12px rgba(90,169,255,0)}}
@@ -176,6 +180,9 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
 /* ---------- data ---------- */
 const SPOTS=/*SPOTS*/;
+const ICONS=/*ICONS*/;
+const CATICON={coffee:'coffee',eat:'onigiri',markets:'watch',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle'};
+const icOf=p=>ICONS[p.ic]||ICONS[CATICON[p.c]]||ICONS.sparkle;
 const PJ={W:944,H:659,LNG0:139.515,LAT1:35.775,KX:2817.621126910331,KY:3468.75};
 const HOME={lat:35.6707238,lng:139.6710513};
 const TRIP0='2026-10-28',TRIP1='2026-11-23';
@@ -294,15 +301,15 @@ function computeMarks(){const pts=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);ret
   const used=new Set();
   [...free].sort((a,b)=>b.n-a.n).forEach(o=>{if(used.has(o))return;const grp=free.filter(q=>!used.has(q)&&Math.hypot(q.mx-o.mx,q.my-o.my)<R);
     if(grp.length>=3){grp.forEach(q=>used.add(q));out.push({t:'c',items:grp.map(q=>q.p),mx:grp.reduce((a,q)=>a+q.mx,0)/grp.length,my:grp.reduce((a,q)=>a+q.my,0)/grp.length})}});
-  free.forEach(o=>{if(!used.has(o))out.push({t:'d',items:[o.p],mx:o.mx,my:o.my})});
+  free.forEach(o=>{if(!used.has(o))out.push({t:'p',items:[o.p],mx:o.mx,my:o.my})});
   return out}
-function markHtml(m){if(m.t==='p'){const p=m.items[0];return pinSvg((CATS[p.c]||CATS.sights).c,!!st.stamps[p.id])+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
-  if(m.t==='c'){const cnt={};m.items.forEach(p=>cnt[p.c]=(cnt[p.c]||0)+1);return `${m.items.length}<i>${Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<b style="background:${(CATS[c]||CATS.sights).c};flex-grow:${n}"></b>`).join('')}</i>`}
-  return ''}
+function markHtml(m){if(m.t==='p'){const p=m.items[0];return `<img src="${icOf(p)}" alt="">`+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
+  const cnt={};m.items.forEach(p=>{const k=p.ic||CATICON[p.c];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
+  return `<img src="${ICONS[top]||ICONS.sparkle}" alt=""><b>${m.items.length}</b>`}
 function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length;if(key===markKey)return;markKey=key;
   marks=computeMarks();PINS.innerHTML='';marks.forEach(m=>{const e=document.createElement('div');const p=m.items[0];
-    e.className=m.t==='c'?'clu':m.t==='d'?'dot'+(st.stamps[p.id]?' st':''):'pin'+(sel&&p.id===sel.id?' sel':'');
-    if(m.t==='d')e.style.background=(CATS[p.c]||CATS.sights).c;e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
+    e.className=m.t==='c'?'clu':'pin'+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'');
+    e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   IMG.style.width=PJ.W*s+'px';IMG.style.height=PJ.H*s+'px';MV.style.transform=`translate3d(${tx}px,${ty}px,0)`;
@@ -331,7 +338,7 @@ const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);clearTimeout(lp
   if(P.size===0){g=null;st.z=s;persistView()}else if(P.size===1&&g&&g.pinch){const [a]=[...P.values()];g={x0:a.x,y0:a.y,tx0:tx,ty0:ty,t:0,moved:true}}};
 MAP.addEventListener('pointerup',up);MAP.addEventListener('pointercancel',up);
 MAP.addEventListener('wheel',e=>{e.preventDefault();const r=MAP.getBoundingClientRect();zoomAt(s*(e.deltaY<0?1.15:1/1.15),e.clientX-r.left,e.clientY-r.top);persistView()},{passive:false});
-function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').map(m=>{const px=tx+m.mx*s,py=ty+m.my*s-(m.t==='p'?10:0);return{m,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<(h.m.t==='d'?18:24)).sort((a,b)=>a.d-b.d);
+function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').map(m=>{const px=tx+m.mx*s,py=ty+m.my*s-11;return{m,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<22).sort((a,b)=>a.d-b.d);
   if(!hits.length){if(sel){sel=null;peek();draw()}return}
   const top=hits[0].m;if(top.t==='c')return openCluster(top);
   const near=hits.filter(h=>h.d-hits[0].d<10&&h.m.t!=='c');
@@ -343,7 +350,7 @@ function flyTo(mx,my,ns){const s0=s,c0=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeig
   const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);s=s0*Math.pow(ns/s0,e);centerOn(c0[0]+(mx-c0[0])*e,c0[1]+(my-c0[1])*e);draw();if(k<1)requestAnimationFrame(step);else{st.z=s;persistView()}};requestAnimationFrame(step)}
 function select(p,center){sfx('pop');sel=p;peek();if(center){const [mx,my]=toM(p.lat,p.lng);if(s<2.4)s=2.4;centerOn(mx,my)}draw()}
 function peek(){const k=$('peek');if(!sel){k.classList.remove('o');return}const p=sel,c=CATS[p.c]||CATS.sights,S=status(p);
-  k.innerHTML=`<i class="sq" style="background:${c.c}"></i><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?' <span style="color:var(--gold);font-size:11px">✦</span>':''}</div><div class="mt">${esc(c.n)} · ${esc(p.a)} · ${away(p)}</div></div><div class="stt"><div class="${S.c}">${esc(S.s.split(' · ')[0])}</div><div class="dt" style="font-size:10px;margin-top:4px">more ▴</div></div>`;
+  k.innerHTML=`<img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?' <span style="color:var(--gold);font-size:11px">✦</span>':''}</div><div class="mt">${esc(c.n)} · ${esc(p.a)} · ${away(p)}</div></div><div class="stt"><div class="${S.c}">${esc(S.s.split(' · ')[0])}</div><div class="dt" style="font-size:10px;margin-top:4px">more ▴</div></div>`;
   k.classList.add('o');k.onclick=()=>spotSheet(p)}
 function chooser(list){sfx('pop');openSh(`<div class="st">${list.length} spots here</div><div class="dt">zoom in, or pick one</div><div id="chl" style="margin-top:6px"></div>`);
   $('chl').innerHTML=list.map((p,i)=>rowHtml(p,i)).join('');$('chl').querySelectorAll('.row').forEach(b=>b.onclick=()=>{const p=list[+b.dataset.i];shut();setTimeout(()=>{select(p);spotSheet(p)},250)})}
@@ -357,7 +364,7 @@ function locate(center){if(!navigator.geolocation){toast('location isn’t avail
   else if(center){const t=you||HOME;const [mx,my]=toM(t.lat,t.lng);if(s<2.4)s=2.4;centerOn(mx,my);draw();if(!you)toast('showing home')}}
 
 /* ---------- list ---------- */
-function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row" data-i="${i}"><i class="sq" style="background:${c.c};width:8px;height:8px"></i><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
+function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
 function list(){const L=$('list'),V=visible();let h='';
   if(!V.length){L.innerHTML=`<div class="dt empty">nothing matches<br>${st.open?'try turning off “open now”':'try another filter'}</div>`;return}
   const groups=st.cat==='all'?Object.keys(CATS):[st.cat];const ord=[];
@@ -375,7 +382,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
   const md=p.dates&&p.dates.length?p.dates.filter(d=>d>=t.iso).map(dlong).join(' · ')||'none left this trip':'';
   const dir=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.pid?p.n:p.lat+','+p.lng)}${p.pid?'&destination_place_id='+p.pid:''}&travelmode=transit`;
   const gm=p.pid?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.n)}&query_place_id=${p.pid}`:`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
-  openSh(`<div class="kat" style="color:${c.c}"><i class="sq" style="background:${c.c};width:7px;height:7px"></i>${esc(c.n)}</div>
+  openSh(`<div class="kat" style="color:${c.c}"><img class="ri" src="${icOf(p)}" alt="" style="width:30px;height:30px">${esc(c.n)}</div>
     <div class="big">${esc(p.n)}</div><div class="area">${esc(p.a)}</div>
     <div class="status ${S.c}"><i style="background:currentColor"></i>${esc(S.s)}</div>
     <div style="margin-top:14px;border-top:1px dashed var(--ln)">
@@ -419,7 +426,7 @@ function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y
     <div class="dt er" id="ae"></div><div class="row2" style="justify-content:center"><button class="bt" id="ag">add spot</button></div>`);
   const paint=()=>{$('acv').textContent=CATS[keys[ci]].n};paint();$('ac').onclick=()=>{sfx('tap');ci=(ci+1)%keys.length;paint()};setTimeout(()=>$('an').focus(),350);
   $('ag').onclick=()=>{const n=$('an').value.trim();if(!n){$('ae').textContent='give it a name';return}
-    const p={id:'u-'+uid(),custom:1,n:n.toLowerCase(),c:keys[ci],a:$('aa').value.trim().toLowerCase()||'saved pin',lat:ll.lat,lng:ll.lng,h:[],p:null,t:[],note:$('ao').value.trim(),pid:''};
+    const p={id:'u-'+uid(),custom:1,ic:CATICON[keys[ci]],n:n.toLowerCase(),c:keys[ci],a:$('aa').value.trim().toLowerCase()||'saved pin',lat:ll.lat,lng:ll.lng,h:[],p:null,t:[],note:$('ao').value.trim(),pid:''};
     st.custom.push(p);save();sfx('add');shut();refresh();select(p);toast('✦ spot added')}}
 
 /* ---------- toast ---------- */
