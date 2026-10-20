@@ -30,7 +30,20 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .logo{flex:1;font-size:22px;letter-spacing:1px;cursor:pointer}.logo b{font-weight:400;color:var(--acc)}
 .pb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;transition:transform .12s steps(2)}
 .pb:active{transform:scale(.88)}
-.sub{padding:0 var(--gr) 0 var(--g);margin-top:-2px}
+.sub{padding:0 var(--gr) 0 var(--g);margin-top:-2px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wxh{display:inline-flex;align-items:center;gap:5px;color:var(--fg);letter-spacing:1px;white-space:nowrap}.wxh img{width:20px;height:20px;image-rendering:pixelated}
+.bkb{margin-top:16px;border:2px dashed var(--ln);padding:12px 12px 14px}
+.bkb .hd2{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;letter-spacing:1px}
+.bkgo{min-height:40px;padding:0 14px;background:var(--gold);color:var(--bg);box-shadow:3px 3px 0 var(--bg2);font-size:12px;letter-spacing:1px;display:inline-flex;align-items:center;white-space:nowrap}
+.bkm{font-size:11px;letter-spacing:1px;color:var(--fg);border-bottom:1px dashed var(--mut);padding:6px 0}
+.bkf{display:none;gap:10px;margin-top:12px;align-items:flex-end}.bkf.o{display:flex}
+select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg);color:var(--fg)}
+.day{margin-top:20px;border-top:2px solid var(--bg2);padding-top:12px}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;letter-spacing:1px}.dh b{font-weight:400}
+.day.today .dh b{color:var(--acc)}.day.today .dh b::after{content:' · today';font-size:10px;color:var(--mut)}
+.dh .wx{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);white-space:nowrap}.dh .wx img{width:22px;height:22px;image-rendering:pixelated}
+.free{font-size:11px;letter-spacing:2px;color:#5A4552;padding:8px 0 2px}
+.pin.bk::before{content:'';position:absolute;left:-2px;top:-2px;width:8px;height:8px;background:#E8B547;box-shadow:0 0 0 1.5px #251B23;z-index:1}
 .srch{display:none;padding:6px var(--gr) 0 var(--g)}.srch.o{display:block}
 .chips{display:flex;gap:16px;padding:12px var(--gr) 10px var(--g);overflow-x:auto;scrollbar-width:none;flex:none}
 .chips::-webkit-scrollbar,.list::-webkit-scrollbar,.sh::-webkit-scrollbar{display:none}
@@ -151,6 +164,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
     <div class="logo" id="logo" role="button" aria-label="Sync">tokyo<b>.</b>exe<i class="syd" id="syd" hidden></i></div>
     <button class="pb" id="bsrch" aria-label="Search saved spots"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M2 0h4v1H2z M1 1h1v1H1z M6 1h1v1H6z M0 2h1v4H0z M7 2h1v4H7z M1 6h1v1H1z M6 6h1v1H6z M2 7h4v1H2z M7 7h1v1H7z M8 8h1v1H8z M9 9h1v1H9z M10 10h1v1h-1z"/></svg></button>
     <button class="pb" id="bview" aria-label="Show as list"></button>
+    <button class="pb" id="bcal" aria-label="Trip calendar"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 2h11v2H0z"/><path fill="#F2E4EA" d="M2 0h1v3H2z M8 0h1v3H8z M0 4h1v7H0z M10 4h1v7h-1z M1 10h9v1H1z M2 6h2v1H2z M5 6h1v1H5z M7 6h2v1H7z M2 8h2v1H2z M5 8h1v1H5z"/></svg></button>
     <button class="pb" id="bstamp" aria-label="Stamp book"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M4 0h4v1H4z M2 1h2v1H2z M8 1h2v1H8z M1 2h1v2H1z M10 2h1v2h-1z M0 4h1v4H0z M11 4h1v4h-1z M1 8h1v2H1z M10 8h1v2h-1z M2 10h2v1H2z M8 10h2v1H8z M4 11h4v1H4z"/><path fill="#E8B547" d="M5 3h2v2H5z M3 5h6v2H3z M5 7h2v2H5z"/></svg></button>
   </div>
   <div class="sub dt" id="sub"></div>
@@ -197,8 +211,9 @@ const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1]
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={map:'kinari',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
+let st={map:'kinari',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{},bk:{},plan:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
+st.bk=st.bk||{};st.plan=st.plan||{};
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
 let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},150);syncSoon()};
 addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}});
@@ -238,6 +253,21 @@ const pm=s=>{const [h,m]=s.split(':').map(Number);return h*60+(m||0)};
 const fm=m=>{m=((m%1440)+1440)%1440;return `${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`};
 const ranges=s=>!s?[]:s.split(',').map(r=>{const [a,b]=r.split('-');let x=pm(a),y=pm(b);if(y<=x)y+=1440;return[x,y]});
 const dlong=iso=>{const [y,m,d]=iso.split('-').map(Number);const dt=new Date(Date.UTC(y,m-1,d));return dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).toLowerCase().replace(',','')};
+const TRIPDAYS=(()=>{const a=[];for(let d=Date.parse(TRIP0+'T00:00:00Z');d<=Date.parse(TRIP1+'T00:00:00Z');d+=864e5)a.push(new Date(d).toISOString().slice(0,10));return a})();
+const dowOf=iso=>(new Date(iso+'T00:00:00Z').getUTCDay()+6)%7;
+const needsBook=p=>!!p.bk||(p.t||[]).some(x=>/\bbook\b|reserv|appointment|pre-order/.test(x));
+const bookURL=p=>p.bk||('https://www.google.com/search?q='+encodeURIComponent(p.n+' '+String(p.a||'').split(' (')[0]+' tokyo 予約'));
+const closedOn=(p,iso)=>!!(p.h&&p.h.length===7&&!p.h[dowOf(iso)]&&!(p.dates&&p.dates.length));
+/* weather (open-meteo, no key) */
+let WX=null;try{WX=JSON.parse(localStorage.getItem('tokyoexe.wx')||'null')}catch(e){}
+const wxIc=(c,day=1)=>c===0?(day?'wsun':'wmoon'):c<=2?(day?'wpart':'wmoon'):c===3?'wcloud':(c===45||c===48)?'wfog':c>=95?'wstorm':((c>=71&&c<=77)||c===85||c===86)?'wsnow':'wrain';
+const wxDay=iso=>WX&&WX.days&&WX.days[iso]?Object.assign({ic:wxIc(WX.days[iso].c)},WX.days[iso]):null;
+async function wxLoad(force){if(!force&&WX&&Date.now()-WX.at<30*60e3)return;
+  try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.68&longitude=139.70&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16');if(!r.ok)return;const j=await r.json();
+    WX={at:Date.now(),cur:{t:Math.round(j.current.temperature_2m),c:j.current.weather_code,day:j.current.is_day},days:{}};
+    j.daily.time.forEach((d,i)=>WX.days[d]={c:j.daily.weather_code[i],hi:Math.round(j.daily.temperature_2m_max[i]),lo:Math.round(j.daily.temperature_2m_min[i]),pp:j.daily.precipitation_probability_max?j.daily.precipitation_probability_max[i]:null});
+    try{localStorage.setItem('tokyoexe.wx',JSON.stringify(WX))}catch(e){}sub();if(st.view==='plan')planView()}catch(e){}}
+function wxHead(){if(!WX||!WX.cur)return '';return `<button class="wxh" id="wxh" aria-label="Tokyo weather now"><img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
 function status(p,t=tnow()){
   if(p.dates&&p.dates.length){const dh=(p.dh||'').replace('dawn','6:00');const [a,b]=dh.includes('-')?dh.split('-'):['',''];
     if(p.dates.includes(t.iso)){if(a&&t.min<pm(a))return{c:'c-mk',s:`market today · from ${a}`};if(b&&t.min>=pm(b))return{c:'c-no',s:'market over for today'};return{c:'c-ok',s:`market today${b?' · till '+b:''}`,open:1}}
@@ -265,14 +295,15 @@ function visible(){const t=tnow(),Q=q.trim().toLowerCase();
 function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter(p=>st.stamps[p.id]).length;let d;
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
-  $('sub').textContent=`${d} · ${all.length} spots · ${n} stamped`}
+  $('sub').innerHTML=`<span>${d} · ${all.length} spots · ${n} stamped</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
 function chips(){const C=$('chips');C.innerHTML=`<button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()}}
 const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F2E4EA" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
   list:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 1h1v9H0z M0 1h3v1H0z M3 2h1v1H3z M4 1h3v1H4z M7 2h1v1H7z M8 1h3v1H8z M10 1h1v9h-1z M0 9h3v1H0z M3 10h1v1H3z M4 9h3v1H4z M7 10h1v1H7z M8 9h3v1H8z"/><path fill="#E5583F" d="M4 4h3v3H4z"/></svg>'};
-function viewBtn(){$('bview').innerHTML=VI[st.view];$('bview').setAttribute('aria-label',st.view==='map'?'Show as list':'Show on map')}
+function viewBtn(){$('bview').innerHTML=VI[st.view==='plan'?'list':st.view];$('bview').setAttribute('aria-label',st.view==='map'?'Show as list':'Show on map')}
 $('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';save();refresh()};
+$('bcal').onclick=()=>{sfx('pop');st.view=st.view==='plan'?'map':'plan';planScrolled=0;save();refresh()};
 $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(s.classList.contains('o'))setTimeout(()=>$('q').focus(),50);else{q='';$('q').value='';refresh()}};
 $('q').oninput=e=>{q=e.target.value;refresh()};
 
@@ -297,7 +328,7 @@ function buildPins(){vis=visible();markKey='';
   LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 /* zoomed out: nearby spots merge into a numbered tile, loners become small dots. zoomed in: full pins. */
-window.__map={go:(lat,lng,z)=>{s=z;const [x,y]=toM(lat,lng);centerOn(x,y);draw()},pair:()=>{const ms=marks.filter(m=>m.t==='p'&&m.e.style.display!=='none'),r=MAP.getBoundingClientRect();for(const a of ms)for(const q of ms){if(a!==q&&Math.hypot((a.mx-q.mx)*s,(a.my-q.my)*s)<16)return [r.left+tx+a.mx*s,r.top+ty+a.my*s-11,a.items[0].n,q.items[0].n]}return null}};
+window.__map={open:id=>{const p=allSpots().find(x=>x.id===id);select(p,true);spotSheet(p)},go:(lat,lng,z)=>{s=z;const [x,y]=toM(lat,lng);centerOn(x,y);draw()},pair:()=>{const ms=marks.filter(m=>m.t==='p'&&m.e.style.display!=='none'),r=MAP.getBoundingClientRect();for(const a of ms)for(const q of ms){if(a!==q&&Math.hypot((a.mx-q.mx)*s,(a.my-q.my)*s)<16)return [r.left+tx+a.mx*s,r.top+ty+a.my*s-11,a.items[0].n,q.items[0].n]}return null}};
 function computeMarks(){const LOOZ=2.4,isLoo=p=>p.c==='loo'&&st.cat==='all';
   const all=vis.map(p=>{const [mx,my]=toP(p.lat,p.lng);return{p,mx,my}}),loos=all.filter(o=>isLoo(o.p)&&(s>=LOOZ||(sel&&o.p.id===sel.id))).map(o=>({t:'p',loo:1,items:[o.p],mx:o.mx,my:o.my})),pts=all.filter(o=>!isLoo(o.p));
   return computeMarks2(pts).concat(loos)}
@@ -314,9 +345,9 @@ function computeMarks2(pts){
 function markHtml(m){if(m.t==='p'){const p=m.items[0];return `<img src="${icOf(p)}" alt="">`+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
   const cnt={};m.items.forEach(p=>{const k=p.ic||CATICON[p.c];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
   return `<img src="${ICONS[top]||ICONS.sparkle}" alt=""><b>${m.items.length}</b>`}
-function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length;if(key===markKey)return;markKey=key;
+function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length+'|'+Object.keys(st.bk).length;if(key===markKey)return;markKey=key;
   marks=computeMarks();PINS.innerHTML='';marks.forEach(m=>{const e=document.createElement('div');const p=m.items[0];
-    e.className=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'');
+    e.className=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'')+(st.bk[p.id]?' bk':'');
     e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
@@ -379,6 +410,41 @@ function list(){const L=$('list'),V=visible();let h='';
   groups.forEach(k=>{const g=V.filter(p=>p.c===k).sort((a,b)=>km(origin(),a)-km(origin(),b));if(!g.length)return;h+=`<div class="gh" style="color:${CATS[k].c}"><span>${CATS[k].n}</span><span class="dt">${g.length}</span></div>`;g.forEach(p=>{h+=rowHtml(p,ord.length);ord.push(p)})});
   L.innerHTML=`<div class="dt" style="margin-top:12px">nearest first · from ${you?'you':'home'}</div>`+h;L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(ord[+b.dataset.i]))}
 
+/* ---------- trip calendar ---------- */
+let planScrolled=0;
+function planView(){const L=$('list'),t=tnow(),A=allSpots(),ord=[];
+  let h=`<div class="dt" style="margin-top:12px;line-height:1.8">your trip · ${TRIPDAYS.length} days<br><span style="color:#5A4552">add places from their card → plan for / booked</span></div>`;
+  const row=(p,meta,warn)=>{ord.push(p);return `<button class="row" data-i="${ord.length-1}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}</div><div class="mt">${meta}</div></div>${warn?`<div class="stt" style="color:var(--acc)">${warn}</div>`:''}</button>`};
+  TRIPDAYS.forEach(iso=>{const dw=dowOf(iso),W=wxDay(iso);
+    const bks=A.filter(p=>st.bk[p.id]&&st.bk[p.id].d===iso).sort((a,b)=>(st.bk[a.id].t||'99')<(st.bk[b.id].t||'99')?-1:1);
+    const wkly=p=>p.c==='markets'&&!(p.dates&&p.dates.length)&&p.h&&p.h.length===7&&p.h.filter(Boolean).length<=3&&p.h[dw];
+    const mks=A.filter(p=>((p.dates&&p.dates.includes(iso))||wkly(p))&&!bks.includes(p));
+    const pool=A.filter(p=>st.plan[p.id]===iso&&!bks.includes(p)&&!mks.includes(p)),route=[];let cur=HOME;
+    while(pool.length){pool.sort((a,b)=>km(cur,a)-km(cur,b));const n=pool.shift();route.push([n,km(cur,n)]);cur=n}
+    h+=`<div class="day${iso===t.iso?' today':''}"${iso===t.iso?' id="today"':''}><div class="dh"><b>${dlong(iso)}</b><span class="wx">${W?`<img src="${ICONS[W.ic]}" alt="">${W.hi}° / ${W.lo}°${W.pp!=null&&W.pp>=30?' · '+W.pp+'% rain':''}`:''}</span></div>`;
+    bks.forEach(p=>{const b=st.bk[p.id];h+=row(p,`<span style="color:var(--gold)">✦ booked${b.t?' · '+b.t:''}</span> · ${esc(p.a)}`,closedOn(p,iso)?'closed '+DOW[dw]:'')});
+    mks.forEach(p=>{h+=row(p,`<span style="color:var(--gold)">market day${p.dh?' · '+esc(p.dh.replace('-','–')):wkly(p)?' · '+esc(p.h[dw].replace('-','–')):''}</span> · ${esc(p.a)}`,'')});
+    route.forEach(([p,k],i)=>{const hop=i===0?'start':(k<2.2?Math.max(1,Math.round(k*1.25/4.8*60))+' min walk on':k.toFixed(1)+' km on');h+=row(p,`${esc(p.a)} · ${hop}`,closedOn(p,iso)?'closed '+DOW[dw]:'')});
+    if(!bks.length&&!mks.length&&!route.length)h+=`<div class="free">free day</div>`;
+    h+='</div>'});
+  L.innerHTML=h;L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(ord[+b.dataset.i]));
+  if(!planScrolled){planScrolled=1;const td=$('today');L.scrollTop=td?td.offsetTop-12:0}}
+function planBlock(p){const b=st.bk[p.id],nb=needsBook(p);
+  const opts=d=>'<option value="">—</option>'+TRIPDAYS.map(x=>`<option value="${x}"${x===d?' selected':''}>${dlong(x)}</option>`).join('');
+  let h='<div class="bkb">';
+  if(nb||b){h+=`<div class="hd2"><span class="dt">${b?'<span style="color:var(--gold)">✦ booked</span>':'needs booking'}</span>${b?`<span>${dlong(b.d)}${b.t?' · '+b.t:''}</span>`:`<a class="bkgo" id="bkgo" href="${bookURL(p)}" target="_blank" rel="noopener">${p.bk?'book ↗':'find booking ↗'}</a>`}</div>
+    <div class="hd2" style="margin-top:8px"><button class="bkm" id="bkm">${b?'change booking':'booked it? add the date'}</button>${b?`<a class="bkm" href="${bookURL(p)}" target="_blank" rel="noopener" style="color:var(--mut)">booking page ↗</a><button class="bkm" id="bkx" style="color:var(--mut)">clear</button>`:''}</div>
+    <div class="bkf" id="bkf"><select class="in" id="bkd" style="flex:1">${opts(b?b.d:(st.plan[p.id]||''))}</select><input class="in" id="bkt" type="time" value="${b&&b.t||''}" style="width:96px"><button class="bt" id="bks" style="padding:8px 12px">save</button></div>`}
+  if(!b)h+=`<div class="hd2" style="${nb?'margin-top:12px;padding-top:10px;border-top:1px dashed var(--ln)':''}"><span class="dt">plan for</span><select class="in" id="pld" style="width:auto;max-width:62%;text-align:right">${opts(st.plan[p.id]||'')}</select></div>`;
+  const d=b?b.d:st.plan[p.id];if(d&&closedOn(p,d))h+=`<div class="dt" style="color:var(--acc);margin-top:10px">heads up · closed on ${DOW[dowOf(d)]}days</div>`;
+  return h+'</div>'}
+function wirePlan(p){const q=id=>document.getElementById(id);
+  if(q('bkgo'))q('bkgo').onclick=()=>sfx('tap');
+  if(q('bkm'))q('bkm').onclick=()=>{sfx('tap');q('bkf').classList.toggle('o')};
+  if(q('bks'))q('bks').onclick=()=>{const d=q('bkd').value;if(!d){toast('pick a day first');return}st.bk[p.id]={d,t:q('bkt').value||''};delete st.plan[p.id];save();sfx('grant');refresh();spotSheet(p);toast('✦ booked · '+dlong(d))};
+  if(q('bkx'))q('bkx').onclick=()=>{const prev=st.bk[p.id];delete st.bk[p.id];save();sfx('undo');refresh();spotSheet(p);toast('booking cleared',()=>{st.bk[p.id]=prev;save();refresh()})};
+  if(q('pld'))q('pld').onchange=()=>{const v=q('pld').value;if(v)st.plan[p.id]=v;else delete st.plan[p.id];save();sfx('tap');refresh();spotSheet(p);toast(v?'added to '+dlong(v):'removed from plan')}}
+
 /* ---------- sheets ---------- */
 const sh=$('sh'),bd=$('bd');
 const openSh=h=>{sh.innerHTML='<button class="grip" aria-label="Close"></button>'+h;sh.scrollTop=0;sh.classList.add('o');bd.classList.add('o');sh.querySelector('.grip').onclick=shut};
@@ -402,10 +468,11 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
     </div>
     ${p.t&&p.t.length?`<div class="tags">${p.t.map(x=>`<span class="tag${TAGW.test(x)?' w':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}
+    ${planBlock(p)}
     <div class="note"><span class="dt">our note</span><textarea class="in" id="nt" rows="2" placeholder="add a note for each other…">${esc(st.notes[p.id]||'')}</textarea></div>
     <div class="acts"><a class="go" id="go" href="${dir}" target="_blank" rel="noopener">take me there ▸</a><button class="stb${stamped?' on':''}" id="stb">${stamped?'✦ stamped':'stamp'}</button></div>
     <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="hide">${p.custom?'delete spot':'hide spot'}</button></div>`);
-  $('wkb').onclick=()=>{const w=$('wk');if(w){sfx('tap');w.classList.toggle('o')}};
+  $('wkb').onclick=()=>{const w=$('wk');if(w){sfx('tap');w.classList.toggle('o')}};wirePlan(p);
   const nt=$('nt');nt.onchange=nt.onblur=()=>{const v=nt.value.trim();if((st.notes[p.id]||'')===v)return;if(v)st.notes[p.id]=v;else delete st.notes[p.id];save()};
   $('go').onclick=()=>sfx('tap');
   $('stb').onclick=()=>{if(st.stamps[p.id]){const prev=st.stamps[p.id];delete st.stamps[p.id];save();sfx('undo');refresh();spotSheet(p);toast('stamp removed',()=>{st.stamps[p.id]=prev;save();refresh()});return}
@@ -444,7 +511,7 @@ $('un').onclick=()=>{sfx('undo');if(undoFn)undoFn();undoFn=null;$('ts').classLis
 
 /* ---------- render ---------- */
 function refresh(){sub();chips();viewBtn();const m=st.view==='map';$('map').style.visibility=m?'':'hidden';$('list').classList.toggle('o',!m);
-  if(sel&&!visible().includes(sel))sel=null;if(m){buildPins();peek()}else list()}
+  $('chips').style.display=st.view==='plan'?'none':'';if(sel&&!visible().includes(sel))sel=null;if(m){buildPins();peek()}else if(st.view==='plan')planView();else list()}
 
 /* ---------- sync (same supabase project as quest.exe, own table) ---------- */
 const SB_URL='https://uwwktosnhogpvlbaetdr.supabase.co',SB_KEY='sb_publishable_J7mv9DtkYYC60bd5PFh8Vw_XzTXUY7z',SK='tokyoexe.sync',TBL='tokyo_docs';
@@ -452,10 +519,11 @@ let sy={last:{},cur:null};try{Object.assign(sy,JSON.parse(localStorage.getItem(S
 const sySave=()=>{try{localStorage.setItem(SK,JSON.stringify(sy))}catch(e){}};
 const canon=v=>JSON.stringify(v,(k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,k)=>(o[k]=x[k],o),{}):x);
 function records(){const m=new Map();Object.entries(st.stamps).forEach(([k,v])=>m.set('st:'+k,{kind:'stamp',data:{d:v}}));Object.entries(st.notes).forEach(([k,v])=>m.set('nt:'+k,{kind:'note',data:{t:v}}));
-  st.custom.forEach(p=>m.set('sp:'+p.id,{kind:'spot',data:p}));Object.keys(st.hidden).forEach(k=>m.set('hd:'+k,{kind:'hide',data:{h:1}}));return m}
-function applyRow(id,kind,d){const k=id.slice(3);if(kind==='stamp')st.stamps[k]=d.d;else if(kind==='note')st.notes[k]=d.t;else if(kind==='hide')st.hidden[k]=1;
+  st.custom.forEach(p=>m.set('sp:'+p.id,{kind:'spot',data:p}));Object.keys(st.hidden).forEach(k=>m.set('hd:'+k,{kind:'hide',data:{h:1}}));
+  Object.entries(st.bk).forEach(([k,v])=>m.set('bk:'+k,{kind:'book',data:v}));Object.entries(st.plan).forEach(([k,v])=>m.set('pl:'+k,{kind:'plan',data:{d:v}}));return m}
+function applyRow(id,kind,d){const k=id.slice(3);if(kind==='stamp')st.stamps[k]=d.d;else if(kind==='note')st.notes[k]=d.t;else if(kind==='hide')st.hidden[k]=1;else if(kind==='book')st.bk[k]=d;else if(kind==='plan')st.plan[k]=d.d;
   else if(kind==='spot'){const o=st.custom.find(p=>p.id===d.id);if(o){for(const x in o)delete o[x];Object.assign(o,d)}else st.custom.push(d)}}
-function removeId(id){const k=id.slice(3),pre=id.slice(0,3);if(pre==='st:')delete st.stamps[k];else if(pre==='nt:')delete st.notes[k];else if(pre==='hd:')delete st.hidden[k];else if(pre==='sp:'){const i=st.custom.findIndex(p=>p.id===k);if(i>=0)st.custom.splice(i,1)}}
+function removeId(id){const k=id.slice(3),pre=id.slice(0,3);if(pre==='st:')delete st.stamps[k];else if(pre==='nt:')delete st.notes[k];else if(pre==='hd:')delete st.hidden[k];else if(pre==='bk:')delete st.bk[k];else if(pre==='pl:')delete st.plan[k];else if(pre==='sp:'){const i=st.custom.findIndex(p=>p.id===k);if(i>=0)st.custom.splice(i,1)}}
 async function push(){const recs=records(),rows=[];
   for(const [id,r] of recs){const j=canon(r.data);if(sy.last[id]!==j)rows.push({id,kind:r.kind,data:JSON.parse(j),deleted:false,j})}
   for(const id in sy.last)if(!recs.has(id))rows.push({id,kind:'gone',data:null,deleted:true,j:null});
@@ -484,7 +552,7 @@ function sbInit(){if(sb)return sb;if(!window.supabase)return null;
     if(u&&!was)setTimeout(()=>{startLive();syncNow()},0);
     if(!u&&was){if(live){sb.removeChannel(live);live=null}setSy('off')}else setSy(syState)})}catch(e){sb=null}return sb}
 function syncSheet(){sfx('pop');if(!sbInit()){openSh(`<div class="st">sync</div><div class="dt">sync couldn’t load · check your connection</div>`);return}
-  if(me){openSh(`<div class="st">sync</div><div class="dt" style="margin-bottom:6px">stamps, notes and added spots are shared between your phones</div>
+  if(me){openSh(`<div class="st">sync</div><div class="dt" style="margin-bottom:6px">stamps, notes, bookings, day plans and added spots are shared between your phones</div>
     <div class="mrow"><span class="k">signed in</span><span class="v">${esc(me.email)}</span></div>
     <div class="mrow"><span class="k">status</span><span class="v" id="syst">${syLabel()}</span></div>
     <div class="row2"><button class="dt" id="syout" style="color:var(--acc)">sign out</button><button class="bt" id="synow">sync now</button></div>`);
@@ -510,7 +578,8 @@ function newPass(){$('spl').hidden=true;openSh(`<div class="st">new password</di
   $('npgo').onclick=async()=>{const pw=$('np').value;if(pw.length<8){$('nper').textContent='use at least 8 characters';return}const {error}=await sb.auth.updateUser({password:pw});if(error){$('nper').textContent=error.message.toLowerCase();return}sfx('grant');shut();history.replaceState(null,'',location.pathname);toast('✦ password changed')}}
 $('logo').onclick=syncSheet;
 sbInit();
-setInterval(()=>{if(!document.hidden){syncSoon(0);sub();if(st.view==='list')list();else if(sel)peek()}},60000);
+setInterval(()=>{if(!document.hidden){syncSoon(0);sub();if(st.view==='list')list();else if(st.view==='plan')planView();else if(sel)peek();wxLoad()}},60000);
+wxLoad();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();syncSoon(0)}});
 
 /* ---------- boot ---------- */
