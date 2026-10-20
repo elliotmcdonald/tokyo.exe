@@ -116,6 +116,7 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed var(--ln);width:100%;text-align:left}
 .row .nm{font-size:13px;letter-spacing:1px;line-height:1.4;overflow-wrap:anywhere}
 .row .mt{font-size:10px;letter-spacing:1px;color:var(--mut);margin-top:3px}
+.lmt{width:44px;height:44px;flex:none;image-rendering:pixelated;border-radius:4px}.lmd{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
 .row .stt{font-size:10px;letter-spacing:1px;text-align:right;flex:none;max-width:42%}
 .row .stp{color:var(--gold);font-size:10px;margin-left:6px}
 .c-ok{color:var(--ok)}.c-soon{color:var(--gold)}.c-no{color:var(--mut)}.c-mk{color:var(--gold)}
@@ -367,7 +368,7 @@ function away(p){const k=km(origin(),p);if(k<2.2)return `${Math.max(1,Math.round
 
 /* ---------- filter ---------- */
 let q='';
-function visible(){const t=tnow(),Q=q.trim().toLowerCase();
+function visible(){if(st.cat==='lm')return [];const t=tnow(),Q=q.trim().toLowerCase();
   return allSpots().filter(p=>(st.cat==='all'?true:(p.c===st.cat||(st.cat==='film'&&p.pd)))&&(!st.open||status(p,t).open)&&(!Q||[p.n,p.a,p.note,(CATS[p.c]||{}).n,(st.notes[p.id]||'')].join(' ').toLowerCase().includes(Q)))}
 
 /* ---------- header ---------- */
@@ -375,7 +376,7 @@ function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
   $('sub').innerHTML=`<span>${d} · ${all.length} spots${n?` · ${n}✦`:''}</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
-function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
+function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button><button class="ch${st.cat==='lm'?' on':''}" data-c="lm"><i style="background:var(--gold)"></i>landmarks</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;st.near=false;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()};
   C.querySelector('[data-n]').onclick=()=>{if(st.near){sfx('tap');st.near=false;st.open=false;st.view='map';save();refresh();return}
@@ -443,7 +444,7 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   syncMarks();
   for(const m of marks){const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;if(m.on!==on){m.e.style.display=on?'':'none';m.on=on;m.e._on=on}if(on)m.e.style.transform=`translate3d(${x|0}px,${y|0}px,0)`}
   const L=LBL.children;if(!LBLM||LBLM.length!==LABELS.length)LBLM=LABELS.map(l=>toM(l[2],l[1]));
-  for(let i=0;i<LABELS.length;i++){const l=LABELS[i],lm=l[3]===2,x=tx+LBLM[i][0]*s,y=ty+LBLM[i][1]*s-(lm?l[4]*s:0);const show=(lm?i===selLm:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;
+  for(let i=0;i<LABELS.length;i++){const l=LABELS[i],lm=l[3]===2,x=tx+LBLM[i][0]*s,y=ty+LBLM[i][1]*s-(lm?l[4]*s:0);const show=(lm?(i===selLm||(st.cat==='lm'&&s>=2.9)):(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;
     if(LBLS[i]!==show){L[i].style.display=show?'':'none';LBLS[i]=show}if(show)L[i].style.transform=`translate3d(${x|0}px,${y|0}px,0) ${lm?'translate(-50%,calc(-100% - 6px))':'translate(-50%,5px)'}`}
   const hl=L[LABELS.length];hl.style.transform=`translate3d(${(tx+homeEl.mx*s)|0}px,${(ty+homeEl.my*s)|0}px,0) translate(-50%,5px)`;
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
@@ -555,6 +556,13 @@ const LMDESC={
 'gate bridge':'tokyo gate bridge, nicknamed the dinosaur bridge for its shape',
 'ohi docks':'the container terminals of tokyo port, with their giant cranes','kyu-furukawa gardens':'a 1917 stone western mansion above rose terraces, with a japanese garden below · roses bloom again in october','sugamo jizo-dori':'“harajuku for grandmas” · old-school snack shops, the famous red underwear stores and a healing jizo','kishimojin':'a quiet temple under a 600-year-old ginkgo, with a candy shop that’s been open since 1781','koishikawa korakuen':'one of tokyo’s oldest gardens, with a stone full-moon bridge mirrored in the pond','yushima tenjin':'the shrine students pray at before exams · walls of wooden ema wishes and plum trees','kanda myojin':'edo’s guardian shrine, a short walk from akihabara, with a bright vermilion-and-gold gate','nippori fabric town':'a street of 80-odd fabric shops · kimono silks, cottons and haberdashery at near-wholesale prices','nihonbashi + kirin':'the 1911 stone bridge where japan’s roads begin, guarded by winged bronze kirin','atago steps of success':'86 steep stone steps to atago shrine · climb them for success, like the samurai who rode up on horseback','sengakuji':'the temple where the 47 ronin are buried · visitors still leave incense at every grave','mukojima hyakkaen':'a small edo-era flower garden with bamboo trellises · something is always in bloom','sumida hokusai museum':'a sharp silver building in hokusai’s home neighbourhood, showing his prints and sketches','toyosu market':'tokyo’s fish market · watch the tuna auction from the gallery at dawn, then sushi for breakfast','mot art museum':'the museum of contemporary art tokyo, a long glass hall in kiba park'};
 
+/* landmarks section: every landmark with a thumbnail cropped from the map itself */
+function lmThumb(cv,l){const [mx,my]=toM(l[2],l[1]),h=(l[4]||6),sz=Math.max(18,h+8),c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle=THEMES[st.map]||'#000';c.fillRect(0,0,cv.width,cv.height);
+  if(IMG.complete&&IMG.naturalWidth)c.drawImage(IMG,mx-sz/2,my-h/2-sz/2-1,sz,sz,0,0,cv.width,cv.height)}
+function lmList(){const L=$('list'),o=origin(),Q=q.trim().toLowerCase();
+  const LM=LABELS.filter(l=>l[3]===2&&(!Q||(l[0]+' '+(LMDESC[l[0]]||'')).toLowerCase().includes(Q))).map(l=>({l,k:km(o,{lat:l[2],lng:l[1]})})).sort((a,b)=>a.k-b.k);
+  L.innerHTML=`<div class="dt" style="margin-top:12px">${LM.length} landmarks · nearest first · from ${you?'you':'home'}</div>`+LM.map(({l},i)=>`<button class="row" data-i="${i}"><canvas class="lmt" width="88" height="88"></canvas><div style="flex:1;min-width:0"><div class="nm">${esc(l[0])}</div><div class="mt lmd">${esc(LMDESC[l[0]]||'')}</div></div><div class="stt dt">${away({lat:l[2],lng:l[1]})}</div></button>`).join('');
+  L.querySelectorAll('.row').forEach((b,i)=>{lmThumb(b.querySelector('canvas'),LM[i].l);b.onclick=()=>{const l=LM[i].l;sfx('tap');st.view='map';save();refresh();const [mx,my]=toM(l[2],l[1]);if(s<3.4)s=3.4;centerOn(mx,my-(l[4]||6)/2);draw();persistView();setTimeout(()=>lmSheet(l),120)}})}
 function lmSheet(l){sfx('pop');selLm=LABELS.indexOf(l);draw();const real=LMREAL[l[0]],lat=real?real[0]:l[2],lng=real?real[1]:l[1],pt={lat,lng};
   const dir=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`,gm=`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   openSh(`<div class="kat" style="color:var(--gold)">✦ landmark</div><div class="big">${esc(l[0])}</div>
@@ -590,7 +598,7 @@ function locate(center){if(!navigator.geolocation){toast('location isn’t avail
 
 /* ---------- list ---------- */
 function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
-function list(){const L=$('list'),V=visible();let h='';
+function list(){if(st.cat==='lm')return lmList();const L=$('list'),V=visible();let h='';
   if(!V.length){L.innerHTML=`<div class="dt empty">nothing matches<br>${st.open?'try turning off “open now”':'try another filter'}</div>`;return}
   if(st.near){const o=origin(),N=V.filter(p=>p.c!=='loo'||km(o,p)<.6).sort((a,b)=>km(o,a)-km(o,b)).slice(0,30);
     L.innerHTML=`<div class="dt" style="margin-top:12px;line-height:1.8">open now · nearest to ${you?'you':'home <span style="color:#5A4552">(finding you…)</span>'}</div>`+N.map((p,i)=>rowHtml(p,i)).join('');
