@@ -438,10 +438,10 @@ function setSy(s,m=''){syState=s;syMsg=m;const d=$('syd');d.hidden=!me;d.classNa
 const syLabel=()=>syState==='ok'?'✦ synced':syState==='busy'?'syncing…':syMsg||'';
 function startLive(){if(live||!sb)return;live=sb.channel(TBL).on('postgres_changes',{event:'*',schema:'public',table:TBL},()=>syncSoon(300)).subscribe()}
 function sbInit(){if(sb)return sb;if(!window.supabase)return null;
-  sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'tokyoexe.auth'}});
+  try{sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'tokyoexe.auth'}});
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss&&ss.user||null,was=me;me=u;if(ev==='PASSWORD_RECOVERY')setTimeout(newPass,300);
     if(u&&!was)setTimeout(()=>{startLive();syncNow()},0);
-    if(!u&&was){if(live){sb.removeChannel(live);live=null}setSy('off')}else setSy(syState)});return sb}
+    if(!u&&was){if(live){sb.removeChannel(live);live=null}setSy('off')}else setSy(syState)})}catch(e){sb=null}return sb}
 function syncSheet(){sfx('pop');if(!sbInit()){openSh(`<div class="st">sync</div><div class="dt">sync couldn’t load · check your connection</div>`);return}
   if(me){openSh(`<div class="st">sync</div><div class="dt" style="margin-bottom:6px">stamps, notes and added spots are shared between your phones</div>
     <div class="mrow"><span class="k">signed in</span><span class="v">${esc(me.email)}</span></div>
