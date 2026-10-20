@@ -41,7 +41,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .body{flex:1;position:relative;min-height:0;border-top:2px solid var(--bg2)}
 #map{position:absolute;inset:0;overflow:hidden;touch-action:none;background:#4B98DD;cursor:grab}
 #mv{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-#mv img{display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
+#mv img{max-width:none!important;max-height:none!important;min-width:0;flex:none;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
 #lbl,#pins{position:absolute;inset:0;pointer-events:none}
 .lb{position:absolute;font-size:10px;letter-spacing:1px;color:var(--fg);background:rgba(37,27,35,.72);padding:1px 4px;white-space:nowrap;transform:translate(-50%,5px)}
 .lb.mj{font-size:11px;background:rgba(37,27,35,.85)}
