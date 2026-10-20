@@ -49,6 +49,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .lb::after{content:'';position:absolute;left:50%;top:-5px;width:3px;height:3px;margin-left:-1px;background:var(--fg)}
 .pin{position:absolute;left:0;top:0;width:21px;height:24px;margin:-24px 0 0 -10px;transition:none}
 .pin svg{display:block}
+.dot{position:absolute;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;box-shadow:0 0 0 2px #251B23,2px 3px 0 1px rgba(0,0,0,.18)}
+.dot.st::after{content:'';position:absolute;inset:3px;background:#E8B547}
+.clu{position:absolute;left:0;top:0;height:24px;min-width:24px;padding:0 5px;margin:-12px 0 0 -12px;background:#251B23;color:#F2E4EA;font-size:12px;letter-spacing:0;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 rgba(0,0,0,.22)}
+.clu i{position:absolute;left:0;right:0;bottom:-3px;height:3px;display:flex}.clu i b{flex:1 1 0;display:block}
 .pin.sm{width:15px;height:17px;margin:-17px 0 0 -7px}.pin.sm svg{width:15px;height:17px}
 .pin.sel{z-index:3}.pin.sel svg{width:30px;height:34px}.pin.sel{width:30px;height:34px;margin:-34px 0 0 -15px}
 .ptag{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-4px);background:var(--bg);color:var(--fg);font-size:11px;letter-spacing:1px;padding:4px 7px;white-space:nowrap;box-shadow:2px 2px 0 var(--bg2)}
@@ -150,8 +154,8 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
   <div class="body">
     <div id="map" aria-label="Map of saved spots">
       <div id="mv"><img id="mimg" alt=""></div>
-      <div id="pins"></div>
       <div id="lbl"></div>
+      <div id="pins"></div>
       <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
       <button class="mbtn" id="zout" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 3h8v2H0z"/></svg></button>
       <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
@@ -215,7 +219,7 @@ const wood=(t0=0,v=.05,f=1650)=>{noise(t0,.035,v*3,f*1.6,6);sine(f,t0,.06,v,f*.6
 function rin(f=830,t0=0,v=.05,len=2.6){[[1,1,len],[2.71,.45,len*.7],[5.15,.2,len*.4],[8.4,.08,len*.25]].forEach(([r,a,du])=>{sine(f*r,t0,du,v*a);sine(f*r+1.3,t0,du,v*a*.6)})}
 const hanko=(t0=0)=>{sine(140,t0,.16,.12,58);noise(t0,.05,.18,700,1.2)};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-const SFX={intro:()=>{[N.D4,N.G4,N.A4,N.D5,N.Eb5,N.D5].forEach((f,i)=>koto(f,i*.17,.45));koto(N.A5,1.05,.35);rin(830,1.25,.035,3)},
+const SFX={intro:()=>{sine(523.25,0,1,.07);sine(1046.5,0,.5,.012);sine(783.99,.18,1.4,.07);sine(1567.98,.18,.7,.014)},
   pop:()=>koto(pick([N.A4,N.D5,N.G5,N.A5]),0,.42),
   open:()=>{koto(N.D5,0,.34);koto(N.A5,.07,.3)},
   add:()=>{[N.G4,N.A4,N.D5].forEach((f,i)=>koto(f,i*.09,.4));rin(1245,.3,.022,1.4)},
@@ -283,21 +287,37 @@ const minS=()=>Math.max(1,MAP.clientWidth/PJ.W,MAP.clientHeight/PJ.H);
 function clamp(){if(s<minS())s=minS();const w=MAP.clientWidth,h=MAP.clientHeight,mw=PJ.W*s,mh=PJ.H*s;
   tx=Math.min(0,Math.max(w-mw,tx));ty=Math.min(0,Math.max(h-mh,ty))}
 function centerOn(mx,my){tx=MAP.clientWidth/2-mx*s;ty=MAP.clientHeight/2-my*s;clamp()}
-let pinEls=[],vis=[],sel=null,raf=0;
+let vis=[],sel=null,raf=0;
 function pinSvg(c,stamped){return `<svg width="21" height="24" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#251B23" d="M1 0h5v1H1z M0 1h1v3H0z M6 1h1v3H6z M1 4h1v1H1z M5 4h1v1H5z M2 5h1v1H2z M4 5h1v1H4z M3 6h1v1H3z"/><path fill="${c}" d="M1 1h5v3H1z M2 4h3v1H2z M3 5h1v1H3z"/><path fill="${stamped?'#E8B547':'#251B23'}" d="${stamped?'M2 2h3v1H2z M3 1h1v3H3z':'M3 2h1v1H3z'}"/><path fill="#000" fill-opacity=".3" d="M2 7h3v1H2z"/></svg>`}
-function buildPins(){vis=visible();PINS.innerHTML='';
-  pinEls=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);const e=document.createElement('div');e.className='pin';e.innerHTML=pinSvg((CATS[p.c]||CATS.sights).c,!!st.stamps[p.id]);PINS.appendChild(e);return{p,mx,my,e}});
+const CL=3.2;let marks=[],markKey='';
+function buildPins(){vis=visible();markKey='';
   const [hx,hy]=toM(HOME.lat,HOME.lng);homeEl={mx:hx,my:hy};
   LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
+/* zoomed out: nearby spots merge into a numbered tile, loners become small dots. zoomed in: full pins. */
+function computeMarks(){const pts=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);return{p,mx,my}});
+  if(s>=CL)return pts.map(o=>({t:'p',items:[o.p],mx:o.mx,my:o.my}));
+  const R=30/s,free=pts.filter(o=>!(sel&&o.p.id===sel.id)),out=[];
+  if(sel){const o=pts.find(o=>o.p.id===sel.id);if(o)out.push({t:'p',items:[o.p],mx:o.mx,my:o.my})}
+  free.forEach(o=>o.n=free.filter(q=>Math.hypot(q.mx-o.mx,q.my-o.my)<R).length);
+  const used=new Set();
+  [...free].sort((a,b)=>b.n-a.n).forEach(o=>{if(used.has(o))return;const grp=free.filter(q=>!used.has(q)&&Math.hypot(q.mx-o.mx,q.my-o.my)<R);
+    if(grp.length>=3){grp.forEach(q=>used.add(q));out.push({t:'c',items:grp.map(q=>q.p),mx:grp.reduce((a,q)=>a+q.mx,0)/grp.length,my:grp.reduce((a,q)=>a+q.my,0)/grp.length})}});
+  free.forEach(o=>{if(!used.has(o))out.push({t:'d',items:[o.p],mx:o.mx,my:o.my})});
+  return out}
+function markHtml(m){if(m.t==='p'){const p=m.items[0];return pinSvg((CATS[p.c]||CATS.sights).c,!!st.stamps[p.id])+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
+  if(m.t==='c'){const cnt={};m.items.forEach(p=>cnt[p.c]=(cnt[p.c]||0)+1);return `${m.items.length}<i>${Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<b style="background:${(CATS[c]||CATS.sights).c};flex-grow:${n}"></b>`).join('')}</i>`}
+  return ''}
+function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length;if(key===markKey)return;markKey=key;
+  marks=computeMarks();PINS.innerHTML='';marks.forEach(m=>{const e=document.createElement('div');const p=m.items[0];
+    e.className=m.t==='c'?'clu':m.t==='d'?'dot'+(st.stamps[p.id]?' st':''):'pin'+(sel&&p.id===sel.id?' sel':'');
+    if(m.t==='d')e.style.background=(CATS[p.c]||CATS.sights).c;e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   IMG.style.width=PJ.W*s+'px';IMG.style.height=PJ.H*s+'px';MV.style.transform=`translate3d(${tx}px,${ty}px,0)`;
-  const w=MAP.clientWidth,h=MAP.clientHeight,small=s<1.6;
-  pinEls.forEach(o=>{const x=tx+o.mx*s,y=ty+o.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;o.e.style.display=on?'':'none';if(!on)return;
-    o.e.style.transform=`translate3d(${x}px,${y}px,0)`;const isSel=sel&&o.p.id===sel.id;o.e.className='pin'+(isSel?' sel':small?' sm':'');
-    if(isSel&&!o.e.querySelector('.ptag'))o.e.insertAdjacentHTML('beforeend',`<div class="ptag">${esc(o.p.n)}</div>`);if(!isSel){const t=o.e.querySelector('.ptag');if(t)t.remove()}});
-  const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const lm=l[3]===2,x=tx+mx*s,y=ty+my*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=1.9))&&x>-60&&x<w+60&&y>-20&&y<h+40;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
+  const w=MAP.clientWidth,h=MAP.clientHeight;syncMarks();
+  marks.forEach(m=>{const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;m.e.style.display=on?'':'none';if(on)m.e.style.transform=`translate3d(${x}px,${y}px,0)`});
+  const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const lm=l[3]===2,x=tx+mx*s,y=ty+my*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
   const hl=L[LABELS.length];hl.style.left=(tx+homeEl.mx*s)+'px';hl.style.top=(ty+homeEl.my*s)+'px';
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
 function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(6,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
@@ -320,10 +340,16 @@ const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);clearTimeout(lp
   if(P.size===0){g=null;st.z=s;persistView()}else if(P.size===1&&g&&g.pinch){const [a]=[...P.values()];g={x0:a.x,y0:a.y,tx0:tx,ty0:ty,t:0,moved:true}}};
 MAP.addEventListener('pointerup',up);MAP.addEventListener('pointercancel',up);
 MAP.addEventListener('wheel',e=>{e.preventDefault();const r=MAP.getBoundingClientRect();zoomAt(s*(e.deltaY<0?1.15:1/1.15),e.clientX-r.left,e.clientY-r.top);persistView()},{passive:false});
-function tapAt(x,y){const hits=pinEls.filter(o=>o.e.style.display!=='none').map(o=>{const px=tx+o.mx*s,py=ty+o.my*s-10;return{o,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<24).sort((a,b)=>a.d-b.d);
+function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').map(m=>{const px=tx+m.mx*s,py=ty+m.my*s-(m.t==='p'?10:0);return{m,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<(h.m.t==='d'?18:24)).sort((a,b)=>a.d-b.d);
   if(!hits.length){if(sel){sel=null;peek();draw()}return}
-  const near=hits.filter(h=>h.d-hits[0].d<10);
-  if(near.length>1&&s<4.5)return chooser(near.map(h=>h.o.p));select(hits[0].o.p)}
+  const top=hits[0].m;if(top.t==='c')return openCluster(top);
+  const near=hits.filter(h=>h.d-hits[0].d<10&&h.m.t!=='c');
+  if(near.length>1&&s<4.5)return chooser(near.map(h=>h.m.items[0]));select(top.items[0])}
+function openCluster(m){sfx('tap');const xs=m.items.map(p=>toM(p.lat,p.lng));const x0=Math.min(...xs.map(a=>a[0])),x1=Math.max(...xs.map(a=>a[0])),y0=Math.min(...xs.map(a=>a[1])),y1=Math.max(...xs.map(a=>a[1]));
+  const w=MAP.clientWidth,h=MAP.clientHeight,fit=Math.min(w*.7/Math.max(1,x1-x0),h*.55/Math.max(1,y1-y0));
+  flyTo((x0+x1)/2,(y0+y1)/2,Math.min(6,Math.max(CL+.05,fit)))}
+function flyTo(mx,my,ns){const s0=s,c0=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeight/2-ty)/s],t0=performance.now(),D=320;
+  const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);s=s0*Math.pow(ns/s0,e);centerOn(c0[0]+(mx-c0[0])*e,c0[1]+(my-c0[1])*e);draw();if(k<1)requestAnimationFrame(step);else{st.z=s;persistView()}};requestAnimationFrame(step)}
 function select(p,center){sfx('pop');sel=p;peek();if(center){const [mx,my]=toM(p.lat,p.lng);if(s<2.4)s=2.4;centerOn(mx,my)}draw()}
 function peek(){const k=$('peek');if(!sel){k.classList.remove('o');return}const p=sel,c=CATS[p.c]||CATS.sights,S=status(p);
   k.innerHTML=`<i class="sq" style="background:${c.c}"></i><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?' <span style="color:var(--gold);font-size:11px">✦</span>':''}</div><div class="mt">${esc(c.n)} · ${esc(p.a)} · ${away(p)}</div></div><div class="stt"><div class="${S.c}">${esc(S.s.split(' · ')[0])}</div><div class="dt" style="font-size:10px;margin-top:4px">more ▴</div></div>`;
