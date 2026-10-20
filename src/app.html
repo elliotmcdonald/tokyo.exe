@@ -45,6 +45,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #lbl,#pins{position:absolute;inset:0;pointer-events:none}
 .lb{position:absolute;font-size:10px;letter-spacing:1px;color:var(--fg);background:rgba(27,32,51,.72);padding:1px 4px;white-space:nowrap;transform:translate(-50%,5px)}
 .lb.mj{font-size:11px;background:rgba(27,32,51,.85)}
+.lb.lm{transform:translate(-50%,calc(-100% - 6px));color:var(--gold);background:rgba(27,32,51,.8)}.lb.lm::after{top:auto;bottom:-5px;background:var(--gold)}
 .lb::after{content:'';position:absolute;left:50%;top:-5px;width:3px;height:3px;margin-left:-1px;background:var(--fg)}
 .pin{position:absolute;left:0;top:0;width:21px;height:24px;margin:-24px 0 0 -10px;transition:none}
 .pin svg{display:block}
@@ -179,11 +180,12 @@ const CATS={coffee:{n:'coffee & tea',c:'#C08A5F',k:'珈琲'},eat:{n:'ramen & foo
   shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F3EBDD',k:'社'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
 SPOTS.forEach(p=>{if(p.c==='gardens')p.c='sights'});
 const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1],['ikebukuro',139.71094,35.7299,1],['ueno',139.77676,35.71351,1],['tokyo stn',139.76704,35.6813,1],['asakusa',139.797774,35.710746,1],['kichijoji',139.57984,35.70295,1],['shimokitazawa',139.66657,35.6616,1],['nakameguro',139.699116,35.64431,1],['ginza',139.765366,35.6715,1],['akihabara',139.77288,35.69824,1],['koenji',139.64955,35.70518,1],
- ['harajuku',139.70261,35.67129],['ebisu',139.70983,35.64658],['daikanyama',139.703084,35.648043],['jiyugaoka',139.668532,35.60735],['sangenjaya',139.669257,35.644148],['nishi-ogikubo',139.59928,35.70351],['nakano',139.66594,35.70573],['yoyogi-uehara',139.67968,35.66906],['hatagaya',139.6768293,35.6772317],['omotesando',139.712473,35.665042],['akasaka',139.736413,35.672104],['yotsuya',139.73038,35.6849],['ochanomizu',139.7651,35.69935],['jimbocho',139.75756,35.696021],['kuramae',139.790858,35.703128],['kiyosumi-shirakawa',139.799841,35.682119],['monzen-nakacho',139.796099,35.671892],['gotokuji',139.64735,35.65374],['mitaka',139.56067,35.70268],['nezu',139.76575,35.717325],['yanaka',139.7660,35.7262],['komagome',139.74788,35.73684],['oizumi-gakuen',139.58655,35.74952],['ningyocho',139.782339,35.686259],['shinagawa',139.73871,35.6288],['skytree',139.8107,35.7101],['meidaimae',139.65056,35.66836],['sasazuka',139.66718,35.67366],['takadanobaba',139.70371,35.71268],['kagurazaka',139.73452,35.703865],['roppongi',139.731155,35.6628],['oi racecourse',139.747055,35.595025],['tennozu',139.75084,35.62038],['futako-tamagawa',139.627213,35.612226],['kameari',139.84731,35.76629],['odaiba',139.7745,35.6290],['jindaiji',139.5504,35.6675]];
+ ['harajuku',139.70261,35.67129],['ebisu',139.70983,35.64658],['daikanyama',139.703084,35.648043],['jiyugaoka',139.668532,35.60735],['sangenjaya',139.669257,35.644148],['nishi-ogikubo',139.59928,35.70351],['nakano',139.66594,35.70573],['yoyogi-uehara',139.67968,35.66906],['hatagaya',139.6768293,35.6772317],['omotesando',139.712473,35.665042],['akasaka',139.736413,35.672104],['yotsuya',139.73038,35.6849],['ochanomizu',139.7651,35.69935],['jimbocho',139.75756,35.696021],['kuramae',139.790858,35.703128],['kiyosumi-shirakawa',139.799841,35.682119],['monzen-nakacho',139.796099,35.671892],['gotokuji',139.64735,35.65374],['mitaka',139.56067,35.70268],['nezu',139.76575,35.717325],['yanaka',139.7660,35.7262],['komagome',139.74788,35.73684],['oizumi-gakuen',139.58655,35.74952],['ningyocho',139.782339,35.686259],['shinagawa',139.73871,35.6288],['skytree',139.8107,35.7101],['meidaimae',139.65056,35.66836],['sasazuka',139.66718,35.67366],['takadanobaba',139.70371,35.71268],['kagurazaka',139.73452,35.703865],['roppongi',139.731155,35.6628],['oi racecourse',139.747055,35.595025],['tennozu',139.75084,35.62038],['futako-tamagawa',139.627213,35.612226],['kameari',139.84731,35.76629],['odaiba',139.7745,35.6290],['jindaiji',139.5504,35.6675],
+ ['hachiko + scramble',139.7005,35.6595,2,5],['godzilla head',139.7020,35.6950,2,24],['kappabashi chef',139.7880,35.7128,2,22],['meiji jingu',139.6993,35.6764,2,7],['senso-ji',139.7967,35.7148,2,27],['imperial palace',139.7528,35.6852,2,10],['rainbow bridge',139.7632,35.6360,2,11],['tokyo tower',139.7454,35.6586,2,37],['gotokuji (cat temple)',139.6474,35.6488,2,7],['ghibli museum',139.5704,35.6962,2,7]];
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={map:'meadow',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
+let st={map:'sencha',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
 let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},150);syncSoon()};
@@ -253,8 +255,8 @@ $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
 const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl');
-const THEMES={meadow:'#4B98DD',washi:'#8EC1D6',night:'#16294D',matcha:'#9FC9C4',pocket:'#306230'};
-if(!THEMES[st.map])st.map='meadow';
+const THEMES={sencha:'#7DB4D3',meadow:'#4B98DD',washi:'#8EC1D6',night:'#16294D',matcha:'#9FC9C4',pocket:'#306230'};
+if(!THEMES[st.map]||!st.mapPicked)st.map='sencha';
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toLL=(x,y)=>({lng:PJ.LNG0+x/PJ.KX,lat:PJ.LAT1-y/PJ.KY});
@@ -267,7 +269,7 @@ function pinSvg(c,stamped){return `<svg width="21" height="24" viewBox="0 0 7 8"
 function buildPins(){vis=visible();PINS.innerHTML='';
   pinEls=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);const e=document.createElement('div');e.className='pin';e.innerHTML=pinSvg((CATS[p.c]||CATS.sights).c,!!st.stamps[p.id]);PINS.appendChild(e);return{p,mx,my,e}});
   const [hx,hy]=toM(HOME.lat,HOME.lng);homeEl={mx:hx,my:hy};
-  LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#1B2033">home</div>'+'<div class="you" id="youd" hidden></div>';
+  LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#1B2033">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
@@ -276,7 +278,7 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   pinEls.forEach(o=>{const x=tx+o.mx*s,y=ty+o.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;o.e.style.display=on?'':'none';if(!on)return;
     o.e.style.transform=`translate3d(${x}px,${y}px,0)`;const isSel=sel&&o.p.id===sel.id;o.e.className='pin'+(isSel?' sel':small?' sm':'');
     if(isSel&&!o.e.querySelector('.ptag'))o.e.insertAdjacentHTML('beforeend',`<div class="ptag">${esc(o.p.n)}</div>`);if(!isSel){const t=o.e.querySelector('.ptag');if(t)t.remove()}});
-  const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const x=tx+mx*s,y=ty+my*s;const show=(l[3]||s>=1.9)&&x>-60&&x<w+60&&y>-20&&y<h+20;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
+  const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const lm=l[3]===2,x=tx+mx*s,y=ty+my*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=1.9))&&x>-60&&x<w+60&&y>-20&&y<h+40;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
   const hl=L[LABELS.length];hl.style.left=(tx+homeEl.mx*s)+'px';hl.style.top=(ty+homeEl.my*s)+'px';
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
 function zoomAt(ns,px,py){ns=Math.max(1,Math.min(6,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
@@ -368,7 +370,7 @@ function stampBook(){sfx('open');const all=allSpots(),done=all.filter(p=>st.stam
     ${done.length?`<div class="sgrid">${done.map((p,i)=>{const c=CATS[p.c]||CATS.sights;return `<button class="stamp" data-i="${i}"><div class="ring" style="border-color:${c.c};color:${c.c};transform:rotate(${(i*37%15)-7}deg)">${c.k}<small>${dlong(st.stamps[p.id]).replace(/^\w+ /,'')}</small></div><span>${esc(p.n)}</span></button>`}).join('')}</div>`:`<div class="dt empty">no stamps yet<br>open a spot and tap “stamp”<br>when you’ve been</div>`}
     <div class="row2" style="margin-top:24px"><button class="dt" id="snd">sound · ${st.snd?'on':'off'}</button><button class="dt" id="mapb">map · ${st.map}</button><button class="dt" id="syb">sync · ${me?'on':'off'}</button></div>`);
   sh.querySelectorAll('.stamp').forEach(b=>b.onclick=()=>{const p=done[+b.dataset.i];shut();setTimeout(()=>{if(st.view!=='map'){st.view='map';refresh()}select(p,true);spotSheet(p)},250)});
-  $('mapb').onclick=()=>{const k=Object.keys(THEMES);st.map=k[(k.indexOf(st.map)+1)%k.length];save();setMap();$('mapb').textContent='map · '+st.map;sfx('tap')};
+  $('mapb').onclick=()=>{const k=Object.keys(THEMES);st.map=k[(k.indexOf(st.map)+1)%k.length];st.mapPicked=1;save();setMap();$('mapb').textContent='map · '+st.map;sfx('tap')};
   $('snd').onclick=()=>{st.snd=!st.snd;save();$('snd').textContent='sound · '+(st.snd?'on':'off');sfx('tap')};$('syb').onclick=syncSheet}
 $('bstamp').onclick=stampBook;
 function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y-MAP.getBoundingClientRect().top-ty)/s;if(mx<0||my<0||mx>PJ.W||my>PJ.H)return;const ll=toLL(mx,my);sfx('pop');
