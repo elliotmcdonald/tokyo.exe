@@ -201,7 +201,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
       <div id="pins"></div>
       <button class="mbtn" id="homeb" aria-label="Take me home"><svg width="18" height="18" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M4 0h1v1H4z M3 1h3v1H3z M2 2h5v1H2z M1 3h7v1H1z M0 4h9v1H0z M1 5h7v4H1z"/><path fill="#251B23" d="M4 6h1v3H4z"/><path fill="#E8B547" d="M2 6h1v1H2z M6 6h1v1H6z"/></svg></button>
       <button class="mbtn" id="rainb" aria-label="Rainy day mode"><svg width="20" height="20" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path class="u" fill="#F2E4EA" d="M4 0h2v1H4z M2 1h6v1H2z M1 2h8v1H1z M0 3h10v1H0z M4 4h1v4H4z M5 7h1v2H5z M2 8h3v1H2z"/></svg></button>
-      <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
+      <button class="mbtn" id="loc" aria-label="Near me now"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
       <div class="peek" id="peek"></div>
     </div>
     <div class="list" id="list"></div>
@@ -380,15 +380,16 @@ function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
   $('sub').innerHTML=`<span>${d} · ${all.length} spots${n?` · ${n}✦`:''}</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
-function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button><button class="ch${st.cat==='lm'?' on':''}" data-c="lm"><i style="background:var(--gold)"></i>landmarks</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
+function chips(){const C=$('chips');C.innerHTML=`<button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button><button class="ch${st.cat==='lm'?' on':''}" data-c="lm"><i style="background:var(--gold)"></i>landmarks</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;st.near=false;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()};
-  C.querySelector('[data-n]').onclick=()=>{if(st.near){sfx('tap');st.near=false;st.open=false;st.view='map';save();refresh();return}
-    sfx('pop');st.near=true;st.open=true;st.cat='all';st.view='list';sel=null;save();locate(false);refresh();$('list').scrollTop=0;if(!you)toast('finding you…')}}
+}
+function nearMe(){if(st.near){sfx('tap');st.near=false;st.open=false;st.view='map';save();refresh();locate(true);return}
+  sfx('pop');st.near=true;st.open=true;st.cat='all';st.view='list';sel=null;save();locate(false);refresh();$('list').scrollTop=0;if(!you)toast('finding you…')}
 const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F2E4EA" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
   list:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 1h1v9H0z M0 1h3v1H0z M3 2h1v1H3z M4 1h3v1H4z M7 2h1v1H7z M8 1h3v1H8z M10 1h1v9h-1z M0 9h3v1H0z M3 10h1v1H3z M4 9h3v1H4z M7 10h1v1H7z M8 9h3v1H8z"/><path fill="#E5583F" d="M4 4h3v3H4z"/></svg>'};
 function viewBtn(){$('bview').innerHTML=VI[st.view==='plan'?'list':st.view];$('bview').setAttribute('aria-label',st.view==='map'?'Show as list':'Show on map')}
-$('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';if(st.view==='map'&&st.near){st.near=false;st.open=false}save();refresh()};
+$('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';if(st.view==='map'&&st.near){st.near=false;st.open=false;setTimeout(()=>locate(true),50)}save();refresh()};
 $('bcal').onclick=()=>{sfx('pop');st.view=st.view==='plan'?'map':'plan';planScrolled=0;save();refresh()};
 $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(s.classList.contains('o'))setTimeout(()=>$('q').focus(),50);else{q='';$('q').value='';refresh()}};
 $('q').oninput=e=>{q=e.target.value;refresh()};
@@ -454,7 +455,7 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
 const MAXZ=14;
 function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(MAXZ,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
-$('loc').onclick=e=>{e.stopPropagation();sfx('tap');locate(true)};
+$('loc').onclick=e=>{e.stopPropagation();nearMe()};
 $('homeb').onclick=e=>{e.stopPropagation();homeSheet()};
 $('rainb').onclick=e=>{e.stopPropagation();sfx('tap');st.rain=!st.rain;st.rainAuto=dayNow();save();refresh();toast(st.rain?'rainy day · indoor spots only':'rainy day off')};
 ['loc','homeb','rainb','peek'].forEach(id=>['pointerdown','pointerup'].forEach(ev=>$(id).addEventListener(ev,e=>e.stopPropagation())));
