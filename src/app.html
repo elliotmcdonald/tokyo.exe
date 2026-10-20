@@ -88,7 +88,9 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 @keyframes pulse{to{box-shadow:0 0 0 12px rgba(90,169,255,0)}}
 .mbtn{position:absolute;width:44px;height:44px;background:var(--bg);box-shadow:3px 3px 0 var(--bg2);display:flex;align-items:center;justify-content:center;z-index:4}
 .mbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg2)}
-#zin{right:14px;bottom:124px}#zout{right:14px;bottom:72px}#loc{right:14px;bottom:20px}
+#zin{right:14px;bottom:124px}#zout{right:14px;bottom:72px}#loc{right:14px;bottom:20px}#addb{left:14px;bottom:20px}
+#rain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
+.ch.nr{color:var(--fg)}.ch.nr::before{content:'◎';color:var(--acc);margin-right:2px}
 .peek{position:absolute;left:0;right:0;bottom:0;z-index:6;background:var(--bg);border-top:2px solid var(--bg2);padding:12px var(--gr) calc(12px + env(safe-area-inset-bottom,0px)) var(--g);display:flex;align-items:center;gap:12px;transform:translateY(110%);transition:transform .3s cubic-bezier(.2,1,.3,1);cursor:pointer}
 .peek.o{transform:none}
 .peek .nm{font-size:15px;letter-spacing:1px;overflow-wrap:anywhere}
@@ -183,10 +185,12 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
   <div class="body">
     <div id="map" aria-label="Map of saved spots">
       <div id="mv"><img id="mimg" alt=""></div>
+      <canvas id="rain" hidden></canvas>
       <div id="lbl"></div>
       <div id="pins"></div>
       <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
       <button class="mbtn" id="zout" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 3h8v2H0z"/></svg></button>
+      <button class="mbtn" id="addb" aria-label="Add a place"><svg width="18" height="18" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E8B547" d="M3 0h3v3h3v3H6v3H3V6H0V3h3z"/></svg></button>
       <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
       <div class="peek" id="peek"></div>
     </div>
@@ -293,7 +297,32 @@ async function wxLoad(force){if(!force&&WX&&Date.now()-WX.at<30*60e3)return;
   try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.68&longitude=139.70&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16');if(!r.ok)return;const j=await r.json();
     WX={at:Date.now(),cur:{t:Math.round(j.current.temperature_2m),c:j.current.weather_code,day:j.current.is_day},days:{}};
     j.daily.time.forEach((d,i)=>WX.days[d]={c:j.daily.weather_code[i],hi:Math.round(j.daily.temperature_2m_max[i]),lo:Math.round(j.daily.temperature_2m_min[i]),pp:j.daily.precipitation_probability_max?j.daily.precipitation_probability_max[i]:null});
-    try{localStorage.setItem('tokyoexe.wx',JSON.stringify(WX))}catch(e){}sub();if(st.view==='plan')planView()}catch(e){}}
+    try{localStorage.setItem('tokyoexe.wx',JSON.stringify(WX))}catch(e){}sub();wxFx();if(st.view==='plan')planView()}catch(e){}}
+/* pixel rain / snow over the map when it's actually raining in tokyo (preview: ?rain=1, ?rain=storm, ?rain=snow) */
+let wxMode=null,rainRAF=0,drops=[],splashes=[],flashT=0;
+function wxFx(){const cv=$('rain');if(!cv)return;const force=new URLSearchParams(location.search).get('rain');let m=null;
+  if(force)m=force==='snow'?'snow':force==='storm'?'storm':force==='drizzle'?'drizzle':'rain';
+  else if(WX&&WX.cur&&Date.now()-WX.at<3*3600e3){const c=WX.cur.c;m=c>=95?'storm':((c>=71&&c<=77)||c===85||c===86)?'snow':(c===51||c===53||c===61||c===80)?'drizzle':((c>=51&&c<=67)||(c>=80&&c<=82))?'rain':null}
+  try{if(matchMedia('(prefers-reduced-motion: reduce)').matches&&!force)m=null}catch(e){}
+  if(m===wxMode)return;wxMode=m;cancelAnimationFrame(rainRAF);drops=[];splashes=[];
+  if(!m){cv.hidden=true;return}cv.hidden=false;rainLoop()}
+function rainLoop(){const cv=$('rain');rainRAF=requestAnimationFrame(rainLoop);if(document.hidden||st.view!=='map')return;
+  const PX=2,cw=Math.ceil(MAP.clientWidth/PX),ch=Math.ceil(MAP.clientHeight/PX);if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
+  const x=cv.getContext('2d');x.clearRect(0,0,cw,ch);const snow=wxMode==='snow';
+  const n=wxMode==='drizzle'?40:snow?70:wxMode==='storm'?150:95;
+  while(drops.length<n)drops.push({x:Math.random()*(cw+30),y:Math.random()*ch-ch*.2,e:Math.random()*ch,v:snow?.18+Math.random()*.22:(wxMode==='drizzle'?1.5:2.3)+Math.random()*1.1,l:wxMode==='drizzle'?2:3+(Math.random()<.4?1:0),s:Math.random()*6.28});
+  drops.length=n;
+  const dark=st.map==='night',drop=dark?'rgba(200,220,245,.6)':'rgba(70,98,140,.62)';
+  if(!snow){x.fillStyle=dark?'rgba(10,14,30,.12)':'rgba(40,52,80,.1)';x.fillRect(0,0,cw,ch)}
+  x.fillStyle=snow?(dark?'rgba(255,255,255,.9)':'rgba(255,255,255,.95)'):drop;
+  for(const d of drops){
+    if(snow){d.y+=d.v;d.s+=.025;d.x+=Math.sin(d.s)*.2;if(d.y>ch){d.y=-2;d.x=Math.random()*cw}x.fillRect(Math.round(d.x),Math.round(d.y),1,1);continue}
+    d.y+=d.v;d.x-=d.v*.2;
+    if(d.y>=d.e){splashes.push({x:Math.round(d.x),y:Math.round(d.e),t:7});d.y=-d.l-Math.random()*30;d.x=Math.random()*(cw+30);d.e=Math.random()*ch;continue}
+    for(let k=0;k<d.l;k++)x.fillRect(Math.round(d.x+k*.2),Math.round(d.y)+k,1,1)}
+  if(snow&&!dark){x.fillStyle='rgba(120,135,160,.5)';for(const d of drops)x.fillRect(Math.round(d.x)+1,Math.round(d.y)+1,1,1)}
+  if(!snow){x.fillStyle=drop;for(const p of splashes){p.t--;if(p.t>4)x.fillRect(p.x,p.y-1,1,1);else{x.fillRect(p.x-1,p.y,1,1);x.fillRect(p.x+1,p.y,1,1)}}splashes=splashes.filter(p=>p.t>0)}
+  if(wxMode==='storm'){if(--flashT<0)flashT=60*(7+Math.random()*9);if(flashT<7){x.fillStyle=`rgba(255,255,255,${flashT%3===0?.2:.07})`;x.fillRect(0,0,cw,ch)}}}
 function wxHead(){if(!WX||!WX.cur)return '';return `<button class="wxh" id="wxh" aria-label="Tokyo weather now"><img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
 function status(p,t=tnow()){
   if(p.dates&&p.dates.length){const dh=(p.dh||'').replace('dawn','6:00');const [a,b]=dh.includes('-')?dh.split('-'):['',''];
@@ -323,13 +352,15 @@ function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
   $('sub').innerHTML=`<span>${d} · ${all.length} spots · ${n} stamped</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
-function chips(){const C=$('chips');C.innerHTML=`<button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
-  C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;save();sel=null;refresh()});
-  C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()}}
+function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
+  C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;st.near=false;save();sel=null;refresh()});
+  C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()};
+  C.querySelector('[data-n]').onclick=()=>{if(st.near){sfx('tap');st.near=false;st.open=false;st.view='map';save();refresh();return}
+    sfx('pop');st.near=true;st.open=true;st.cat='all';st.view='list';sel=null;save();locate(false);refresh();$('list').scrollTop=0;if(!you)toast('finding you…')}}
 const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F2E4EA" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
   list:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 1h1v9H0z M0 1h3v1H0z M3 2h1v1H3z M4 1h3v1H4z M7 2h1v1H7z M8 1h3v1H8z M10 1h1v9h-1z M0 9h3v1H0z M3 10h1v1H3z M4 9h3v1H4z M7 10h1v1H7z M8 9h3v1H8z"/><path fill="#E5583F" d="M4 4h3v3H4z"/></svg>'};
 function viewBtn(){$('bview').innerHTML=VI[st.view==='plan'?'list':st.view];$('bview').setAttribute('aria-label',st.view==='map'?'Show as list':'Show on map')}
-$('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';save();refresh()};
+$('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';if(st.view==='map'&&st.near){st.near=false;st.open=false}save();refresh()};
 $('bcal').onclick=()=>{sfx('pop');st.view=st.view==='plan'?'map':'plan';planScrolled=0;save();refresh()};
 $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(s.classList.contains('o'))setTimeout(()=>$('q').focus(),50);else{q='';$('q').value='';refresh()}};
 $('q').oninput=e=>{q=e.target.value;refresh()};
@@ -389,7 +420,8 @@ function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(MAXZ,ns));const mx=(px-tx)
 $('zin').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s*1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
 $('zout').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s/1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
 $('loc').onclick=e=>{e.stopPropagation();sfx('tap');locate(true)};
-['zin','zout','loc','peek'].forEach(id=>['pointerdown','pointerup'].forEach(ev=>$(id).addEventListener(ev,e=>e.stopPropagation())));
+$('addb').onclick=e=>{e.stopPropagation();addSheet()};
+['zin','zout','loc','addb','peek'].forEach(id=>['pointerdown','pointerup'].forEach(ev=>$(id).addEventListener(ev,e=>e.stopPropagation())));
 let pvT;function persistView(){clearTimeout(pvT);pvT=setTimeout(()=>{const c=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeight/2-ty)/s];st.cx=c[0];st.cy=c[1];st.z=s;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},400)}
 /* gestures: one finger pans, two pinch, tap picks a pin, long-press drops a new spot */
 const P=new Map();let g=null,lastTap=0,lpT=null;
@@ -427,13 +459,16 @@ let watching=false;
 function locate(center){if(!navigator.geolocation){toast('location isn’t available on this device');return}
   if(!watching){watching=true;navigator.geolocation.watchPosition(pos=>{const first=!you;you={lat:pos.coords.latitude,lng:pos.coords.longitude};
     const [mx,my]=toM(you.lat,you.lng),inMap=mx>0&&my>0&&mx<PJ.W&&my<PJ.H;if(!inMap){you=null;if(first&&center){toast('you’re not on the map yet · showing home');const [hx,hy]=toM(HOME.lat,HOME.lng);centerOn(hx,hy);draw()}return}
-    if(first&&center){if(s<2.4)s=2.4;centerOn(mx,my)}draw();if(sel)peek()},err=>{watching=false;toast(err.code===1?'location is off · allow it in settings':'couldn’t find you · try again');if(center){const [hx,hy]=toM(HOME.lat,HOME.lng);centerOn(hx,hy);draw()}},{enableHighAccuracy:true,maximumAge:15000,timeout:15000})}
+    if(first&&center){if(s<2.4)s=2.4;centerOn(mx,my)}draw();if(sel)peek();if(first&&st.view==='list')list()},err=>{watching=false;toast(err.code===1?'location is off · allow it in settings':'couldn’t find you · try again');if(center){const [hx,hy]=toM(HOME.lat,HOME.lng);centerOn(hx,hy);draw()}},{enableHighAccuracy:true,maximumAge:15000,timeout:15000})}
   else if(center){const t=you||HOME;const [mx,my]=toM(t.lat,t.lng);if(s<2.4)s=2.4;centerOn(mx,my);draw();if(!you)toast('showing home')}}
 
 /* ---------- list ---------- */
 function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
 function list(){const L=$('list'),V=visible();let h='';
   if(!V.length){L.innerHTML=`<div class="dt empty">nothing matches<br>${st.open?'try turning off “open now”':'try another filter'}</div>`;return}
+  if(st.near){const o=origin(),N=V.filter(p=>p.c!=='loo'||km(o,p)<.6).sort((a,b)=>km(o,a)-km(o,b)).slice(0,30);
+    L.innerHTML=`<div class="dt" style="margin-top:12px;line-height:1.8">open now · nearest to ${you?'you':'home <span style="color:#5A4552">(finding you…)</span>'}</div>`+N.map((p,i)=>rowHtml(p,i)).join('');
+    L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(N[+b.dataset.i]));return}
   const groups=st.cat==='all'?Object.keys(CATS):st.cat==='film'?['film','loo']:[st.cat];const ord=[];
   groups.forEach(k=>{const g=V.filter(p=>p.c===k).sort((a,b)=>km(origin(),a)-km(origin(),b));if(!g.length)return;h+=`<div class="gh" style="color:${CATS[k].c}"><span>${CATS[k].n}</span><span class="dt">${g.length}</span></div>`;g.forEach(p=>{h+=rowHtml(p,ord.length);ord.push(p)})});
   L.innerHTML=`<div class="dt" style="margin-top:12px">nearest first · from ${you?'you':'home'}</div>`+h;L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(ord[+b.dataset.i]))}
@@ -534,18 +569,32 @@ function stampBook(){sfx('open');const all=allSpots(),done=all.filter(p=>st.stam
   $('mapb').onclick=()=>{const k=Object.keys(THEMES);st.map=k[(k.indexOf(st.map)+1)%k.length];st.mapPicked=1;save();setMap();$('mapb').textContent='map · '+st.map;sfx('tap')};
   $('snd').onclick=()=>{st.snd=!st.snd;save();$('snd').textContent='sound · '+(st.snd?'on':'off');sfx('tap')};$('syb').onclick=syncSheet}
 $('bstamp').onclick=stampBook;
-function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y-MAP.getBoundingClientRect().top-ty)/s;if(mx<0||my<0||mx>PJ.W||my>PJ.H)return;const ll=toLL(mx,my);sfx('pop');
-  const keys=Object.keys(CATS);let ci=0;
-  openSh(`<div class="st">add a spot here</div><div class="dt" style="margin-bottom:8px">dropped where you pressed · ${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}</div>
-    <input class="in" id="an" placeholder="name" autocomplete="off">
+function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y-MAP.getBoundingClientRect().top-ty)/s;if(mx<0||my<0||mx>PJ.W||my>PJ.H)return;const ll=toLL(mx,my);sfx('pop');addForm(ll.lat,ll.lng,{},'dropped where you pressed')}
+function addForm(lat,lng,pre={},how='from search'){
+  const keys=Object.keys(CATS).filter(k=>k!=='loo'&&k!=='film');let ci=Math.max(0,keys.indexOf(pre.c||keys[0]));
+  openSh(`<div class="st">add a spot</div><div class="dt" style="margin-bottom:8px">${esc(how)} · ${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+    <input class="in" id="an" placeholder="name" autocomplete="off" value="${esc(pre.n||'')}">
     <button class="mrow cy" id="ac"><span class="k">category</span><span class="v" id="acv"></span></button>
-    <input class="in" id="aa" placeholder="area (e.g. koenji)" autocomplete="off" style="margin-top:6px">
+    <input class="in" id="aa" placeholder="area (e.g. koenji)" autocomplete="off" style="margin-top:6px" value="${esc(pre.a||'')}">
     <textarea class="in" id="ao" rows="2" placeholder="note (optional)" style="margin-top:6px"></textarea>
     <div class="dt er" id="ae"></div><div class="row2" style="justify-content:center"><button class="bt" id="ag">add spot</button></div>`);
-  const paint=()=>{$('acv').textContent=CATS[keys[ci]].n};paint();$('ac').onclick=()=>{sfx('tap');ci=(ci+1)%keys.length;paint()};setTimeout(()=>$('an').focus(),350);
+  const paint=()=>{$('acv').innerHTML=`<img src="${ICONS[CATICON[keys[ci]]]}" alt="" style="width:18px;height:18px;vertical-align:-4px;image-rendering:pixelated;margin-right:6px">${CATS[keys[ci]].n} ▸`};paint();$('ac').onclick=()=>{sfx('tap');ci=(ci+1)%keys.length;paint()};if(!pre.n)setTimeout(()=>$('an').focus(),350);
   $('ag').onclick=()=>{const n=$('an').value.trim();if(!n){$('ae').textContent='give it a name';return}
-    const p={id:'u-'+uid(),custom:1,ic:CATICON[keys[ci]],n:n.toLowerCase(),c:keys[ci],a:$('aa').value.trim().toLowerCase()||'saved pin',lat:ll.lat,lng:ll.lng,h:[],p:null,t:[],note:$('ao').value.trim(),pid:''};
-    st.custom.push(p);save();sfx('add');shut();refresh();select(p);toast('✦ spot added')}}
+    const p={id:'u-'+uid(),custom:1,ic:CATICON[keys[ci]],n:n.toLowerCase(),c:keys[ci],a:$('aa').value.trim().toLowerCase()||'saved pin',lat,lng,h:[],p:null,t:[],note:$('ao').value.trim(),pid:''};
+    st.custom.push(p);if(st.view!=='map')st.view='map';save();sfx('add');shut();refresh();select(p,true);toast('✦ spot added')}}
+const guessCat=r=>{const t=(r.t||'')+' '+(r.n||'').toLowerCase();return /cafe|coffee|kissa|tea/.test(t)?'coffee':/restaurant|fast_food|food_court|ramen|noodle|sushi|izakaya|bakery|confectionery/.test(t)?'eat':/\bbar\b|pub|biergarten|nightclub/.test(t)?'bars':/shrine|temple|place_of_worship|jinja/.test(t)?'shrines':/marketplace|flea/.test(t)?'markets':/second_hand|charity|vintage|thrift/.test(t)?'thrift':/music|record/.test(t)?'records':/craft|gallery|furniture|interior|ceramic|pottery/.test(t)?'craft':r.k==='shop'?'shops':'sights'};
+function addSheet(){sfx('open');openSh(`<div class="st">add a place</div><div class="dt" style="margin-bottom:8px;line-height:1.8">search by name · or press and hold the map to drop a pin</div>
+  <input class="in" id="aq" type="search" placeholder="e.g. kayaba coffee" autocomplete="off" enterkeyhint="search"><div id="ar" style="margin-top:6px"></div>`);
+  const q=$('aq'),R=$('ar');let tm,seq=0;setTimeout(()=>q.focus(),350);
+  const msg=t=>R.innerHTML=`<div class="dt" style="padding:14px 0;line-height:1.8">${t}</div>`;
+  async function go(){const v=q.value.trim(),my=++seq;if(v.length<2){R.innerHTML='';return}msg('searching…');
+    try{const r=await fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(v)+'&lat=35.68&lon=139.72&limit=8&bbox=139.45,35.5,139.95,35.85');const j=await r.json();if(my!==seq)return;
+      const seen=new Set(),rs=(j.features||[]).filter(f=>f.geometry&&f.properties).map(f=>{const p=f.properties;return{n:String(p.name||v),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0],a:String(p.district||p.locality||p.suburb||p.city||'').toLowerCase(),k:p.osm_key,t:p.osm_value,street:p.street||''}}).filter(r=>{const k=r.n+'|'+r.lat.toFixed(4);if(seen.has(k))return false;seen.add(k);return true});
+      if(!rs.length){msg('nothing found · try the english or japanese name<br>or press and hold the map to drop a pin');return}
+      R.innerHTML=rs.map((r,i)=>`<button class="row" data-i="${i}"><img class="ri" src="${ICONS[CATICON[guessCat(r)]]}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(r.n.toLowerCase())}</div><div class="mt">${esc([String(r.t||'').replace(/_/g,' '),r.a||r.street].filter(Boolean).join(' · '))}</div></div><div class="stt dt">${away(r)}</div></button>`).join('');
+      R.querySelectorAll('.row').forEach(b=>b.onclick=()=>{const r=rs[+b.dataset.i];sfx('tap');addForm(r.lat,r.lng,{n:r.n.toLowerCase(),a:r.a,c:guessCat(r)})})}
+    catch(e){if(my===seq)msg('can’t search right now · no connection?<br>press and hold the map to drop a pin instead')}}
+  q.oninput=()=>{clearTimeout(tm);tm=setTimeout(go,450)};q.onkeydown=e=>{if(e.key==='Enter'){clearTimeout(tm);go()}}}
 
 /* ---------- toast ---------- */
 let undoFn=null,tt=null;
@@ -622,7 +671,7 @@ function newPass(){$('spl').hidden=true;openSh(`<div class="st">new password</di
 $('logo').onclick=syncSheet;
 sbInit();
 setInterval(()=>{if(!document.hidden){syncSoon(0);sub();if(st.view==='list')list();else if(st.view==='plan')planView();else if(sel)peek();wxLoad()}},60000);
-wxLoad();
+wxLoad();wxFx();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();syncSoon(0)}});
 
 /* ---------- boot ---------- */
