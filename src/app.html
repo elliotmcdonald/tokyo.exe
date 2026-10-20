@@ -278,7 +278,7 @@ $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
 const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl');
-const THEMES={sencha:'#6AACD9',mistria:'#4FA9DC',momiji:'#6FA6BC',sakura:'#8DC4DD',dusk:'#5C7EC2',snow:'#7DA7CA',moss:'#5D99A8',meadow:'#4B98DD',washi:'#8EC1D6',matcha:'#9FC9C4',night:'#16294D',pocket:'#306230'};
+const THEMES={sencha:'#6AACD9',mistria:'#4FA9DC',momiji:'#6FA6BC',sakura:'#8DC4DD',dusk:'#5C7EC2',snow:'#7DA7CA',moss:'#5D99A8',ukiyo:'#2F5C8F',hinoki:'#7FA59A',yuzu:'#5FB3C9',neon:'#173E6E',riso:'#3FA7B5',fuji:'#7FA7D6',meadow:'#4B98DD',washi:'#8EC1D6',matcha:'#9FC9C4',night:'#16294D',pocket:'#306230'};
 if(!THEMES[st.map]||!st.mapPicked)st.map='sencha';
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
