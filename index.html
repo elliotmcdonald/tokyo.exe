@@ -101,9 +101,10 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 @keyframes pulse{to{box-shadow:0 0 0 12px rgba(90,169,255,0)}}
 .mbtn{position:absolute;width:44px;height:44px;background:var(--bg);box-shadow:3px 3px 0 var(--bg2);display:flex;align-items:center;justify-content:center;z-index:4}
 .mbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--bg2)}
-#zin{right:14px;bottom:124px}#zout{right:14px;bottom:72px}#loc{right:14px;bottom:20px}#addb{left:14px;bottom:20px}
+#rainb{right:14px;bottom:124px}#homeb{right:14px;bottom:72px}#loc{right:14px;bottom:20px}
+#rainb.on{background:#2E4A63;box-shadow:3px 3px 0 #1B2C3B}#rainb.on .u{fill:#9FC6E6}
 #rain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
-.pin.cl{opacity:.35;filter:grayscale(1)}.pin.rn{opacity:.28;filter:grayscale(.85)}.row.cl{opacity:.5}
+.pin.cl,.clu.cl{opacity:.35;filter:grayscale(1)}.pin.rn{opacity:.28;filter:grayscale(.85)}.row.cl{opacity:.5}
 .ch.rn{border:1.5px solid var(--ln);padding:3px 8px}.ch.rn.on{border-color:#7DA7CA;color:#9FC6E6}.ch.rn.on::before{content:none}
 .lg{display:flex;gap:14px;overflow-x:auto;margin-top:12px;padding-bottom:2px}
 .drv{font-size:30px;line-height:1.35;margin:10px 0 6px;color:var(--fg)}.drva{font-size:22px;line-height:1.5;margin:8px 0;color:var(--fg);word-break:break-all}
@@ -208,10 +209,8 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
       <canvas id="rain" hidden></canvas>
       <div id="lbl"></div>
       <div id="pins"></div>
-      <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
-      <button class="mbtn" id="zout" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 3h8v2H0z"/></svg></button>
-      <button class="mbtn" id="addb" aria-label="Add a place"><svg width="18" height="18" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E8B547" d="M3 0h3v3h3v3H6v3H3V6H0V3h3z"/></svg></button>
       <button class="mbtn" id="homeb" aria-label="Take me home"><svg width="18" height="18" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M4 0h1v1H4z M3 1h3v1H3z M2 2h5v1H2z M1 3h7v1H1z M0 4h9v1H0z M1 5h7v4H1z"/><path fill="#251B23" d="M4 6h1v3H4z"/><path fill="#E8B547" d="M2 6h1v1H2z M6 6h1v1H6z"/></svg></button>
+      <button class="mbtn" id="rainb" aria-label="Rainy day mode"><svg width="20" height="20" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path class="u" fill="#F2E4EA" d="M4 0h2v1H4z M2 1h6v1H2z M1 2h8v1H1z M0 3h10v1H0z M4 4h1v4H4z M5 7h1v2H5z M2 8h3v1H2z"/></svg></button>
       <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
       <div class="peek" id="peek"></div>
     </div>
@@ -314,7 +313,8 @@ const dowOf=iso=>(new Date(iso+'T00:00:00Z').getUTCDay()+6)%7;
 const needsBook=p=>!!p.bk||(p.t||[]).some(x=>/\bbook\b|reserv|appointment|pre-order/.test(x));
 const bookURL=p=>p.bk||('https://www.google.com/search?q='+encodeURIComponent(p.n+' '+String(p.a||'').split(' (')[0]+' tokyo 予約'));
 const closedOn=(p,iso)=>!!(p.h&&p.h.length===7&&!p.h[dowOf(iso)]&&!(p.dates&&p.dates.length));
-const closedToday=p=>closedOn(p,dayNow());
+let NOWT=null;const nowT=()=>NOWT||(NOWT=tnow());setInterval(()=>{NOWT=null},30000);
+const shutNow=(p,t)=>!!((p.h&&p.h.length===7)||(p.dates&&p.dates.length))&&!status(p,t||nowT()).open;
 /* weather (open-meteo, no key) */
 let WX=null;try{WX=JSON.parse(localStorage.getItem('tokyoexe.wx')||'null')}catch(e){}
 const wxIc=(c,day=1)=>c===0?(day?'wsun':'wmoon'):c<=2?(day?'wpart':'wmoon'):c===3?'wcloud':(c===45||c===48)?'wfog':c>=95?'wstorm':((c>=71&&c<=77)||c===85||c===86)?'wsnow':'wrain';
@@ -390,10 +390,9 @@ function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
   $('sub').innerHTML=`<span>${d} · ${all.length} spots${n?` · ${n}✦`:''}</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
-function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch rn${st.rain?' on':''}" data-r="1">☂ rainy day</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button><button class="ch${st.cat==='lm'?' on':''}" data-c="lm"><i style="background:var(--gold)"></i>landmarks</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
+function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button><button class="ch${st.cat==='lm'?' on':''}" data-c="lm"><i style="background:var(--gold)"></i>landmarks</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;st.near=false;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()};
-  C.querySelector('[data-r]').onclick=()=>{sfx('tap');st.rain=!st.rain;st.rainAuto=dayNow();save();refresh();toast(st.rain?'rainy day · indoor spots first':'rainy day off')};
   C.querySelector('[data-n]').onclick=()=>{if(st.near){sfx('tap');st.near=false;st.open=false;st.view='map';save();refresh();return}
     sfx('pop');st.near=true;st.open=true;st.cat='all';st.view='list';sel=null;save();locate(false);refresh();$('list').scrollTop=0;if(!you)toast('finding you…')}}
 const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F2E4EA" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
@@ -442,10 +441,10 @@ function computeMarks2(pts){
 function markHtml(m){if(m.t==='p'){const p=m.items[0];return `<img src="${icOf(p)}" alt="">`+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
   const cnt={};m.items.forEach(p=>{const k=p.ic||CATICON[p.c];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
   return `<img src="${ICONS[top]||ICONS.sparkle}" alt=""><b>${m.items.length}</b>`}
-function syncMarks(){const key=(s>=CL?'Z':Math.round(Math.log2(s)*10))+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length+'|'+Object.keys(st.bk).length+'|'+(st.rain?1:0)+'|'+dayNow();if(key===markKey)return;markKey=key;
+function syncMarks(){const key=(s>=CL?'Z':Math.round(Math.log2(s)*10))+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length+'|'+Object.keys(st.bk).length+'|'+(st.rain?1:0)+'|'+Math.floor(Date.now()/60000);if(key===markKey)return;markKey=key;
   marks=computeMarks();const keep=new Set();
   for(const m of marks){const p=m.items[0],k=m.t==='c'?'c:'+m.items.length+':'+p.id:'p:'+p.id;
-    const cls=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'')+(st.bk[p.id]?' bk':'')+(m.loo||(sel&&p.id===sel.id)||st.stamps[p.id]||st.bk[p.id]?'':closedToday(p)?' cl':st.rain&&!indoor(p)?' rn':''),html=markHtml(m);
+    const cls=m.t==='c'?'clu'+(m.items.every(q=>shutNow(q)||(st.rain&&!indoor(q)))?' cl':''):'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'')+(st.bk[p.id]?' bk':'')+(m.loo||(sel&&p.id===sel.id)||st.stamps[p.id]||st.bk[p.id]?'':shutNow(p)?' cl':st.rain&&!indoor(p)?' rn':''),html=markHtml(m);
     let e=PPOOL.get(k);if(!e){e=document.createElement('div');e.style.display='none';e._on=false;PPOOL.set(k,e);PINS.appendChild(e)}
     if(e.className!==cls)e.className=cls;if(e._h!==html){e.innerHTML=html;e._h=html}m.e=e;m.on=e._on;keep.add(k)}
   for(const [k,e] of PPOOL)if(!keep.has(k)){e.remove();PPOOL.delete(k)}}
@@ -465,17 +464,15 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
 const MAXZ=14;
 function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(MAXZ,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
-$('zin').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s*1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
-$('zout').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s/1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
 $('loc').onclick=e=>{e.stopPropagation();sfx('tap');locate(true)};
-$('addb').onclick=e=>{e.stopPropagation();addSheet()};
 $('homeb').onclick=e=>{e.stopPropagation();homeSheet()};
-['zin','zout','loc','addb','homeb','peek'].forEach(id=>['pointerdown','pointerup'].forEach(ev=>$(id).addEventListener(ev,e=>e.stopPropagation())));
+$('rainb').onclick=e=>{e.stopPropagation();sfx('tap');st.rain=!st.rain;st.rainAuto=dayNow();save();refresh();toast(st.rain?'rainy day · indoor spots only':'rainy day off')};
+['loc','homeb','rainb','peek'].forEach(id=>['pointerdown','pointerup'].forEach(ev=>$(id).addEventListener(ev,e=>e.stopPropagation())));
 let pvT;function persistView(){clearTimeout(pvT);pvT=setTimeout(()=>{const c=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeight/2-ty)/s];st.cx=c[0];st.cy=c[1];st.z=s;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},400)}
 /* gestures: one finger pans, two pinch, tap picks a pin, long-press drops a new spot */
 const P=new Map();let g=null,lastTap=0,lpT=null;
 MAP.addEventListener('pointerdown',e=>{MAP.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(P.size===1){g={x0:e.clientX,y0:e.clientY,tx0:tx,ty0:ty,t:Date.now(),moved:false};clearTimeout(lpT);lpT=setTimeout(()=>{if(g&&!g.moved&&P.size===1){g.lp=true;longPress(e.clientX,e.clientY)}},560)}
+  if(P.size===1){g={x0:e.clientX,y0:e.clientY,tx0:tx,ty0:ty,t:Date.now(),moved:false};clearTimeout(lpT);lpT=0}
   else if(P.size===2){clearTimeout(lpT);const [a,b]=[...P.values()];g={pinch:true,d0:Math.hypot(a.x-b.x,a.y-b.y),s0:s,mx:((a.x+b.x)/2),my:((a.y+b.y)/2),tx0:tx,ty0:ty,moved:true}}});
 MAP.addEventListener('pointermove',e=>{if(!P.has(e.pointerId)||!g)return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});const r=MAP.getBoundingClientRect();
   if(g.pinch&&P.size===2){const [a,b]=[...P.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),ns=Math.max(minS(),Math.min(MAXZ,g.s0*d/g.d0));const cx=(a.x+b.x)/2-r.left,cy=(a.y+b.y)/2-r.top;const mx=(g.mx-r.left-g.tx0)/g.s0,my=(g.my-r.top-g.ty0)/g.s0;s=ns;tx=cx-mx*s;ty=cy-my*s;clamp();draw()}
@@ -616,7 +613,7 @@ function locate(center){if(!navigator.geolocation){toast('location isn’t avail
   else if(center){const t=you||HOME;const [mx,my]=toM(t.lat,t.lng);if(s<2.4)s=2.4;centerOn(mx,my);draw();if(!you)toast('showing home')}}
 
 /* ---------- list ---------- */
-function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row${closedToday(p)?' cl':''}" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
+function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row${shutNow(p)?' cl':''}" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
 function list(){if(st.cat==='lm')return lmList();const L=$('list'),V=visible();let h='';
   if(!V.length){L.innerHTML=`<div class="dt empty">nothing matches<br>${st.open?'try turning off “open now”':'try another filter'}</div>`;return}
   if(st.near){const o=origin(),N=V.filter(p=>p.c!=='loo'||km(o,p)<.6).sort((a,b)=>km(o,a)-km(o,b)).slice(0,30);
@@ -711,7 +708,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
   let armed=false;$('hide').onclick=()=>{if(!armed){armed=true;sfx('tap');$('hide').textContent='tap again';return}
     if(p.custom){const i=st.custom.indexOf(p);st.custom.splice(i,1);save();shut();sel=null;refresh();toast('spot deleted',()=>{st.custom.splice(i,0,p);save();refresh()})}
     else{st.hidden[p.id]=1;save();shut();sel=null;refresh();toast('spot hidden',()=>{delete st.hidden[p.id];save();refresh()})}}}
-function slam(p){const c=CATS[p.c]||CATS.sights,d=document.createElement('div');d.className='slam';d.innerHTML=`${c.k}<small>${dlong(tnow().iso)}</small>`;app.appendChild(d);sfx('stamp');
+function slam(p){const c=CATS[p.c]||CATS.sights,d=document.createElement('div');d.className='slam';d.style.borderColor=d.style.color=c.c;d.innerHTML=`${c.k}<small>${dlong(tnow().iso)}</small>`;app.appendChild(d);sfx('stamp');
   setTimeout(()=>{try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}app.animate([{transform:'translate(0,0)'},{transform:'translate(0,3px)'},{transform:'translate(0,-1px)'},{transform:'translate(0,0)'}],{duration:170,easing:'ease-out'})},520);d.animate([{transform:'scale(1.8) rotate(-18deg)',opacity:0},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.35},{transform:'scale(1) rotate(-8deg)',opacity:1,offset:.8},{transform:'scale(1) rotate(-8deg)',opacity:0}],{duration:1500,easing:'steps(12)',fill:'forwards'}).onfinish=()=>d.remove()}
 
 /* ---------- take me home + driver card ---------- */
@@ -781,7 +778,7 @@ function toast(m,undo){const ts=$('ts');undoFn=undo||null;$('un').hidden=!undo;t
 $('un').onclick=()=>{sfx('undo');if(undoFn)undoFn();undoFn=null;$('ts').classList.remove('o')};
 
 /* ---------- render ---------- */
-function refresh(){sub();chips();viewBtn();const m=st.view==='map';$('map').style.visibility=m?'':'hidden';$('list').classList.toggle('o',!m);
+function refresh(){sub();$('rainb').classList.toggle('on',!!st.rain);chips();viewBtn();const m=st.view==='map';$('map').style.visibility=m?'':'hidden';$('list').classList.toggle('o',!m);
   $('chips').style.display=st.view==='plan'?'none':'';if(sel&&!visible().includes(sel))sel=null;if(m){buildPins();peek()}else if(st.view==='plan')planView();else list()}
 
 /* ---------- sync (same supabase project as quest.exe, own table) ---------- */
