@@ -281,6 +281,7 @@ const THEMES={sencha:'#7DB4D3',meadow:'#4B98DD',washi:'#8EC1D6',night:'#16294D',
 if(!THEMES[st.map]||!st.mapPicked)st.map='sencha';
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
+const toP=(lat,lng)=>{const [x,y]=toM(lat,lng);return[Math.max(12,Math.min(PJ.W-12,x)),Math.max(28,Math.min(PJ.H-6,y))]};
 const toLL=(x,y)=>({lng:PJ.LNG0+x/PJ.KX,lat:PJ.LAT1-y/PJ.KY});
 let s=st.z||2,tx=0,ty=0;
 const minS=()=>Math.max(1,MAP.clientWidth/PJ.W,MAP.clientHeight/PJ.H);
@@ -295,7 +296,7 @@ function buildPins(){vis=visible();markKey='';
   LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 /* zoomed out: nearby spots merge into a numbered tile, loners become small dots. zoomed in: full pins. */
-function computeMarks(){const pts=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);return{p,mx,my}});
+function computeMarks(){const pts=vis.map(p=>{const [mx,my]=toP(p.lat,p.lng);return{p,mx,my}});
   if(s>=CL)return pts.map(o=>({t:'p',items:[o.p],mx:o.mx,my:o.my}));
   const R=30/s,free=pts.filter(o=>!(sel&&o.p.id===sel.id)),out=[];
   if(sel){const o=pts.find(o=>o.p.id===sel.id);if(o)out.push({t:'p',items:[o.p],mx:o.mx,my:o.my})}
@@ -345,12 +346,12 @@ function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').
   const top=hits[0].m;if(top.t==='c')return openCluster(top);
   const near=hits.filter(h=>h.d-hits[0].d<10&&h.m.t!=='c');
   if(near.length>1&&s<4.5)return chooser(near.map(h=>h.m.items[0]));select(top.items[0])}
-function openCluster(m){sfx('tap');const xs=m.items.map(p=>toM(p.lat,p.lng));const x0=Math.min(...xs.map(a=>a[0])),x1=Math.max(...xs.map(a=>a[0])),y0=Math.min(...xs.map(a=>a[1])),y1=Math.max(...xs.map(a=>a[1]));
+function openCluster(m){sfx('tap');const xs=m.items.map(p=>toP(p.lat,p.lng));const x0=Math.min(...xs.map(a=>a[0])),x1=Math.max(...xs.map(a=>a[0])),y0=Math.min(...xs.map(a=>a[1])),y1=Math.max(...xs.map(a=>a[1]));
   const w=MAP.clientWidth,h=MAP.clientHeight,fit=Math.min(w*.7/Math.max(1,x1-x0),h*.55/Math.max(1,y1-y0));
   flyTo((x0+x1)/2,(y0+y1)/2,Math.min(6,Math.max(CL+.05,fit)))}
 function flyTo(mx,my,ns){const s0=s,c0=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeight/2-ty)/s],t0=performance.now(),D=320;
   const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);s=s0*Math.pow(ns/s0,e);centerOn(c0[0]+(mx-c0[0])*e,c0[1]+(my-c0[1])*e);draw();if(k<1)requestAnimationFrame(step);else{st.z=s;persistView()}};requestAnimationFrame(step)}
-function select(p,center){sfx('pop');sel=p;peek();if(center){const [mx,my]=toM(p.lat,p.lng);if(s<2.4)s=2.4;centerOn(mx,my)}draw()}
+function select(p,center){sfx('pop');sel=p;peek();if(center){const [mx,my]=toP(p.lat,p.lng);if(s<2.4)s=2.4;centerOn(mx,my)}draw()}
 function peek(){const k=$('peek');if(!sel){k.classList.remove('o');return}const p=sel,c=CATS[p.c]||CATS.sights,S=status(p);
   k.innerHTML=`<img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?' <span style="color:var(--gold);font-size:11px">✦</span>':''}</div><div class="mt">${esc(c.n)} · ${esc(p.a)} · ${away(p)}</div></div><div class="stt"><div class="${S.c}">${esc(S.s.split(' · ')[0])}</div><div class="dt" style="font-size:10px;margin-top:4px">more ▴</div></div>`;
   k.classList.add('o');k.onclick=()=>spotSheet(p)}
