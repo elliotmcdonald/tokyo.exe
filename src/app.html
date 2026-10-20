@@ -36,7 +36,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .bkb .hd2{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;letter-spacing:1px}
 .bkgo{min-height:40px;padding:0 14px;background:var(--gold);color:var(--bg);box-shadow:3px 3px 0 var(--bg2);font-size:12px;letter-spacing:1px;display:inline-flex;align-items:center;white-space:nowrap}
 .bkm{font-size:11px;letter-spacing:1px;color:var(--fg);border-bottom:1px dashed var(--mut);padding:6px 0}
-.bkf{display:none;gap:10px;margin-top:12px;align-items:flex-end}.bkf.o{display:flex}
+.ctab{display:flex;gap:18px}.ctab button{font-size:12px;letter-spacing:1px;color:var(--mut);padding:6px 0;border-bottom:2px solid transparent}.ctab button.on{color:var(--fg);border-color:var(--acc)}
+.cst{margin-top:8px;min-height:30px}
+.cal{margin-top:8px}.cw,.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cw{margin-bottom:4px}.cw i{font-style:normal;font-size:10px;color:var(--mut);text-align:center;letter-spacing:1px}
+.cd{position:relative;height:40px;font-family:var(--px);font-size:13px;color:var(--fg);background:var(--bg2);display:flex;align-items:center;justify-content:center}
+.cd small{position:absolute;top:2px;left:4px;font-size:8px;letter-spacing:1px;color:var(--mut)}
+.cd.cl{color:#5A4552;text-decoration:line-through}
+.cd.mk::after{content:'';position:absolute;bottom:4px;left:50%;width:4px;height:4px;margin-left:-2px;background:var(--gold)}
+.cd.bz::before{content:'';position:absolute;top:4px;right:4px;width:3px;height:3px;background:var(--fg);opacity:.7}
+.cd.td{box-shadow:inset 0 0 0 1px var(--acc)}
+.cd.on{background:var(--fg);color:var(--bg);text-decoration:none}.cd.on small{color:var(--bg)}.bkmode .cd.on{background:var(--gold)}
+.cd:active{transform:translate(1px,1px)}
 select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg);color:var(--fg)}
 .day{margin-top:20px;border-top:2px solid var(--bg2);padding-top:12px}
 .dh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;letter-spacing:1px}.dh b{font-weight:400}
@@ -429,21 +439,36 @@ function planView(){const L=$('list'),t=tnow(),A=allSpots(),ord=[];
     h+='</div>'});
   L.innerHTML=h;L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(ord[+b.dataset.i]));
   if(!planScrolled){planScrolled=1;const td=$('today');L.scrollTop=td?td.offsetTop-12:0}}
-function planBlock(p){const b=st.bk[p.id],nb=needsBook(p);
-  const opts=d=>'<option value="">—</option>'+TRIPDAYS.map(x=>`<option value="${x}"${x===d?' selected':''}>${dlong(x)}</option>`).join('');
+const isMkDay=(p,iso)=>!!((p.dates&&p.dates.includes(iso))||(p.c==='markets'&&!(p.dates&&p.dates.length)&&p.h&&p.h.length===7&&p.h.filter(Boolean).length<=3&&p.h[dowOf(iso)]));
+const busyOn=(iso,id)=>allSpots().some(q=>q.id!==id&&((st.bk[q.id]&&st.bk[q.id].d===iso)||st.plan[q.id]===iso));
+function calGrid(p,mode){const sel=mode==='bk'?(st.bk[p.id]||{}).d:st.plan[p.id],today=tnow().iso;
+  const blanks='<span></span>'.repeat(dowOf(TRIPDAYS[0]));
+  return `<div class="cal${mode==='bk'?' bkmode':''}"><div class="cw">${['m','t','w','t','f','s','s'].map(x=>`<i>${x}</i>`).join('')}</div><div class="cg">${blanks}${TRIPDAYS.map((iso,i)=>{const d=+iso.slice(8);
+    const c=['cd',iso===sel?'on':'',closedOn(p,iso)?'cl':'',isMkDay(p,iso)?'mk':'',iso===today?'td':'',busyOn(iso,p.id)?'bz':''].join(' ');
+    return `<button class="${c}" data-d="${iso}" aria-label="${dlong(iso)}">${i===0||d===1?`<small>${iso.slice(5,7)==='10'?'oct':'nov'}</small>`:''}${d}</button>`}).join('')}</div></div>`}
+function planBlock(p,mode){const b=st.bk[p.id],nb=needsBook(p);mode=mode||(b?'bk':'pl');
   let h='<div class="bkb">';
-  if(nb||b){h+=`<div class="hd2"><span class="dt">${b?'<span style="color:var(--gold)">✦ booked</span>':'needs booking'}</span>${b?`<span>${dlong(b.d)}${b.t?' · '+b.t:''}</span>`:`<a class="bkgo" id="bkgo" href="${bookURL(p)}" target="_blank" rel="noopener">${p.bk?'book ↗':'find booking ↗'}</a>`}</div>
-    <div class="hd2" style="margin-top:8px"><button class="bkm" id="bkm">${b?'change booking':'booked it? add the date'}</button>${b?`<a class="bkm" href="${bookURL(p)}" target="_blank" rel="noopener" style="color:var(--mut)">booking page ↗</a><button class="bkm" id="bkx" style="color:var(--mut)">clear</button>`:''}</div>
-    <div class="bkf" id="bkf"><select class="in" id="bkd" style="flex:1">${opts(b?b.d:(st.plan[p.id]||''))}</select><input class="in" id="bkt" type="time" value="${b&&b.t||''}" style="width:96px"><button class="bt" id="bks" style="padding:8px 12px">save</button></div>`}
-  if(!b)h+=`<div class="hd2" style="${nb?'margin-top:12px;padding-top:10px;border-top:1px dashed var(--ln)':''}"><span class="dt">plan for</span><select class="in" id="pld" style="width:auto;max-width:62%;text-align:right">${opts(st.plan[p.id]||'')}</select></div>`;
+  if(nb||b)h+=`<div class="hd2"><span class="dt">${b?`<span style="color:var(--gold)">✦ booked</span>`:'needs booking'}</span>${b?`<span>${dlong(b.d)}${b.t?' · '+b.t:''}</span>`:`<a class="bkgo" id="bkgo" href="${bookURL(p)}" target="_blank" rel="noopener">${p.bk?'book ↗':'find booking ↗'}</a>`}</div>`;
+  h+=`<div class="ctab"${nb||b?' style="margin-top:12px"':''}><button class="${mode==='pl'?'on':''}" data-m="pl">plan a day</button>${nb||b?`<button class="${mode==='bk'?'on':''}" data-m="bk">booked</button>`:''}</div>`;
+  if(mode==='pl'){const d=st.plan[p.id];h+=`<div class="hd2 cst"><span class="dt">${d?`planned · <span style="color:var(--fg)">${dlong(d)}</span>`:'tap a day'}</span>${d?'<button class="bkm" id="plx" style="color:var(--mut)">remove</button>':''}</div>`}
+  else h+=`<div class="hd2 cst"><span class="dt">${b?'tap another day to move it':'tap the day you booked'}</span><span style="display:flex;align-items:center;gap:8px"><span class="dt">time</span><input class="in" id="bkt" type="time" value="${b&&b.t||''}" style="width:92px;font-size:14px;padding:2px 0 4px"></span></div>`;
+  h+=calGrid(p,mode);
+  h+=`<div class="hd2" style="margin-top:8px"><span class="dt" style="font-size:10px">${isMkDayAny(p)?'<span style="color:var(--gold)">▪</span> market day   ':''}${p.h&&p.h.length===7&&p.h.some(x=>!x)?'<s>1</s> closed':''}${TRIPDAYS.some(iso=>busyOn(iso,p.id))?'<span style="color:var(--fg)">▫</span> other plans':''}</span>${mode==='bk'&&b?`<span style="display:flex;gap:14px"><a class="bkm" href="${bookURL(p)}" target="_blank" rel="noopener" style="color:var(--mut)">booking page ↗</a><button class="bkm" id="bkx" style="color:var(--mut)">clear</button></span>`:''}</div>`;
   const d=b?b.d:st.plan[p.id];if(d&&closedOn(p,d))h+=`<div class="dt" style="color:var(--acc);margin-top:10px">heads up · closed on ${DOW[dowOf(d)]}days</div>`;
   return h+'</div>'}
-function wirePlan(p){const q=id=>document.getElementById(id);
+const isMkDayAny=p=>TRIPDAYS.some(iso=>isMkDay(p,iso));
+function wirePlan(p,mode){const q=id=>document.getElementById(id),box=q('pb');if(!box)return;mode=mode||(st.bk[p.id]?'bk':'pl');
+  const redraw=m=>{box.innerHTML=planBlock(p,m);wirePlan(p,m)};
   if(q('bkgo'))q('bkgo').onclick=()=>sfx('tap');
-  if(q('bkm'))q('bkm').onclick=()=>{sfx('tap');q('bkf').classList.toggle('o')};
-  if(q('bks'))q('bks').onclick=()=>{const d=q('bkd').value;if(!d){toast('pick a day first');return}st.bk[p.id]={d,t:q('bkt').value||''};delete st.plan[p.id];save();sfx('grant');refresh();spotSheet(p);toast('✦ booked · '+dlong(d))};
-  if(q('bkx'))q('bkx').onclick=()=>{const prev=st.bk[p.id];delete st.bk[p.id];save();sfx('undo');refresh();spotSheet(p);toast('booking cleared',()=>{st.bk[p.id]=prev;save();refresh()})};
-  if(q('pld'))q('pld').onchange=()=>{const v=q('pld').value;if(v)st.plan[p.id]=v;else delete st.plan[p.id];save();sfx('tap');refresh();spotSheet(p);toast(v?'added to '+dlong(v):'removed from plan')}}
+  box.querySelectorAll('.ctab button').forEach(b=>b.onclick=()=>{sfx('tap');redraw(b.dataset.m)});
+  box.querySelectorAll('.cd').forEach(c=>c.onclick=()=>{const d=c.dataset.d;
+    if(mode==='pl'){if(st.plan[p.id]===d){delete st.plan[p.id];sfx('undo')}else{st.plan[p.id]=d;sfx('tap')}}
+    else{const cur=st.bk[p.id];if(cur&&cur.d===d){const prev=cur;delete st.bk[p.id];sfx('undo');toast('booking cleared',()=>{st.bk[p.id]=prev;save();refresh();redraw('bk')})}
+      else{st.bk[p.id]={d,t:(q('bkt')&&q('bkt').value)||(cur&&cur.t)||''};delete st.plan[p.id];sfx('grant');toast('✦ booked · '+dlong(d))}}
+    save();refresh();redraw(mode)});
+  if(q('bkt'))q('bkt').onchange=()=>{const b=st.bk[p.id];if(b){b.t=q('bkt').value||'';save();refresh();redraw('bk')}};
+  if(q('plx'))q('plx').onclick=()=>{delete st.plan[p.id];sfx('undo');save();refresh();redraw('pl')};
+  if(q('bkx'))q('bkx').onclick=()=>{const prev=st.bk[p.id];delete st.bk[p.id];save();sfx('undo');refresh();redraw('pl');toast('booking cleared',()=>{st.bk[p.id]=prev;save();refresh();redraw('bk')})}}
 
 /* ---------- sheets ---------- */
 const sh=$('sh'),bd=$('bd');
@@ -468,7 +493,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
     </div>
     ${p.t&&p.t.length?`<div class="tags">${p.t.map(x=>`<span class="tag${TAGW.test(x)?' w':''}">${esc(x)}</span>`).join('')}</div>`:''}
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}
-    ${planBlock(p)}
+    <div id="pb">${planBlock(p)}</div>
     <div class="note"><span class="dt">our note</span><textarea class="in" id="nt" rows="2" placeholder="add a note for each other…">${esc(st.notes[p.id]||'')}</textarea></div>
     <div class="acts"><a class="go" id="go" href="${dir}" target="_blank" rel="noopener">take me there ▸</a><button class="stb${stamped?' on':''}" id="stb">${stamped?'✦ stamped':'stamp'}</button></div>
     <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="hide">${p.custom?'delete spot':'hide spot'}</button></div>`);
