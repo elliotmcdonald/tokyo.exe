@@ -181,18 +181,18 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* ---------- data ---------- */
 const SPOTS=/*SPOTS*/;
 const ICONS=/*ICONS*/;
-const CATICON={coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle'};
+const CATICON={coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle',film:'film',loo:'toilet'};
 const icOf=p=>ICONS[p.ic]||ICONS[CATICON[p.c]]||ICONS.sparkle;
 const PJ={W:944,H:659,LNG0:139.515,LAT1:35.775,KX:2817.621126910331,KY:3468.75};
 const HOME={lat:35.6707238,lng:139.6710513};
 const TRIP0='2026-10-28',TRIP1='2026-11-23';
 const CATS={coffee:{n:'coffee & tea',c:'#C08A5F',k:'珈琲'},eat:{n:'ramen & food',c:'#E5583F',k:'麺'},markets:{n:'flea & antiques',c:'#E8B547',k:'市'},thrift:{n:'thrift',c:'#F29A5B',k:'古'},
   records:{n:'records',c:'#E77FB0',k:'盤'},jazz:{n:'jazz kissa',c:'#9A8AF2',k:'音'},bars:{n:'bars',c:'#5FC2D9',k:'酒'},craft:{n:'design & craft',c:'#3FB5AA',k:'器'},
-  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
+  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},film:{n:'perfect days',c:'#E8B547',k:'映'},loo:{n:'free toilets',c:'#8CC4E8',k:'WC'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
 SPOTS.forEach(p=>{if(p.c==='gardens')p.c='sights'});
 const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1],['ikebukuro',139.71094,35.7299,1],['ueno',139.77676,35.71351,1],['tokyo stn',139.76704,35.6813,1],['asakusa',139.797774,35.710746,1],['kichijoji',139.57984,35.70295,1],['shimokitazawa',139.66657,35.6616,1],['nakameguro',139.699116,35.64431,1],['ginza',139.765366,35.6715,1],['akihabara',139.77288,35.69824,1],['koenji',139.64955,35.70518,1],
  ['harajuku',139.70261,35.67129],['ebisu',139.70983,35.64658],['daikanyama',139.703084,35.648043],['jiyugaoka',139.668532,35.60735],['sangenjaya',139.669257,35.644148],['nishi-ogikubo',139.59928,35.70351],['nakano',139.66594,35.70573],['yoyogi-uehara',139.67968,35.66906],['hatagaya',139.6768293,35.6772317],['omotesando',139.712473,35.665042],['akasaka',139.736413,35.672104],['yotsuya',139.73038,35.6849],['ochanomizu',139.7651,35.69935],['jimbocho',139.75756,35.696021],['kuramae',139.790858,35.703128],['kiyosumi-shirakawa',139.799841,35.682119],['monzen-nakacho',139.796099,35.671892],['gotokuji',139.64735,35.65374],['mitaka',139.56067,35.70268],['nezu',139.76575,35.717325],['yanaka',139.7660,35.7262],['komagome',139.74788,35.73684],['oizumi-gakuen',139.58655,35.74952],['ningyocho',139.782339,35.686259],['shinagawa',139.73871,35.6288],['skytree',139.8107,35.7101],['meidaimae',139.65056,35.66836],['sasazuka',139.66718,35.67366],['takadanobaba',139.70371,35.71268],['kagurazaka',139.73452,35.703865],['roppongi',139.731155,35.6628],['oi racecourse',139.747055,35.595025],['tennozu',139.75084,35.62038],['futako-tamagawa',139.627213,35.612226],['kameari',139.84731,35.76629],['odaiba',139.7745,35.6290],['jindaiji',139.5504,35.6675],
- ['hachiko + scramble',139.7005,35.6595,2,5],['godzilla head',139.7020,35.6950,2,24],['kappabashi chef',139.7880,35.7128,2,22],['meiji jingu',139.6993,35.6764,2,7],['senso-ji',139.7967,35.7148,2,27],['imperial palace',139.7528,35.6852,2,10],['rainbow bridge',139.7632,35.6360,2,11],['tokyo tower',139.7454,35.6586,2,37],['gotokuji (cat temple)',139.6474,35.6488,2,7],['ghibli museum',139.5704,35.6962,2,7],['ueno zoo',139.7713,35.7164,2,7],['tokyo dome',139.7519,35.7056,2,5],['sumo hall',139.7934,35.6969,2,6],['wako clock',139.7650,35.6719,2,9],['roppongi hills',139.7292,35.6604,2,16],['sunshine 60',139.7180,35.7290,2,18],['carrot tower',139.6703,35.6436,2,11],['big sight',139.7944,35.6301,2,6],['fuji tv',139.7745,35.6270,2,8],['swan boats',139.5762,35.6992,2,4],['electric town',139.7731,35.6984,2,4],['tsukiji market',139.7707,35.6655,2,5],['koenji live houses',139.6496,35.7052,2,7]];
+ ['hachiko + scramble',139.7005,35.6595,2,5],['godzilla head',139.7020,35.6950,2,24],['kappabashi chef',139.7880,35.7128,2,22],['meiji jingu',139.6993,35.6764,2,7],['senso-ji',139.7967,35.7148,2,27],['imperial palace',139.7528,35.6852,2,10],['rainbow bridge',139.7632,35.6360,2,11],['tokyo tower',139.7454,35.6586,2,37],['gotokuji (cat temple)',139.6474,35.6488,2,7],['ghibli museum',139.5704,35.6962,2,7],['ueno zoo',139.7713,35.7164,2,7],['tokyo dome',139.7519,35.7056,2,5],['sumo hall',139.7934,35.6969,2,6],['wako clock',139.7650,35.6719,2,9],['roppongi hills',139.7292,35.6604,2,16],['sunshine 60',139.7180,35.7290,2,18],['carrot tower',139.6703,35.6436,2,11],['big sight',139.7944,35.6301,2,6],['fuji tv',139.7745,35.6270,2,8],['swan boats',139.5762,35.6992,2,4],['electric town',139.7731,35.6984,2,4],['tsukiji market',139.7707,35.6655,2,5],['koenji live houses',139.6496,35.7052,2,7],['tocho towers',139.6922,35.6896,2,10],['denkiyu sento',139.8226,35.7164,2,9],['sakurabashi',139.8067,35.7174,2,7],['yoyogi hachimangu',139.6889,35.6719,2,6],['yanaka cats',139.7650,35.7277,2,6],['nakano broadway',139.6656,35.7090,2,6],['statue of liberty',139.7717,35.6276,2,7],['kiyosumi garden',139.7976,35.6806,2,5],['takeshita street',139.7027,35.6716,2,3]];
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
@@ -256,10 +256,10 @@ function away(p){const k=km(origin(),p);if(k<2.2)return `${Math.max(1,Math.round
 /* ---------- filter ---------- */
 let q='';
 function visible(){const t=tnow(),Q=q.trim().toLowerCase();
-  return allSpots().filter(p=>(st.cat==='all'||p.c===st.cat)&&(!st.open||status(p,t).open)&&(!Q||[p.n,p.a,p.note,(CATS[p.c]||{}).n,(st.notes[p.id]||'')].join(' ').toLowerCase().includes(Q)))}
+  return allSpots().filter(p=>(st.cat==='all'?p.c!=='loo':(p.c===st.cat||(st.cat==='film'&&p.pd)))&&(!st.open||status(p,t).open)&&(!Q||[p.n,p.a,p.note,(CATS[p.c]||{}).n,(st.notes[p.id]||'')].join(' ').toLowerCase().includes(Q)))}
 
 /* ---------- header ---------- */
-function sub(){const t=tnow(),all=allSpots(),n=all.filter(p=>st.stamps[p.id]).length;let d;
+function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter(p=>st.stamps[p.id]).length;let d;
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
   $('sub').textContent=`${d} · ${all.length} spots · ${n} stamped`}
@@ -367,7 +367,7 @@ function locate(center){if(!navigator.geolocation){toast('location isn’t avail
 function rowHtml(p,i){const c=CATS[p.c]||CATS.sights,S=status(p);return `<button class="row" data-i="${i}"><img class="ri" src="${icOf(p)}" alt=""><div style="flex:1;min-width:0"><div class="nm">${esc(p.n)}${st.stamps[p.id]?'<span class="stp">✦</span>':''}</div><div class="mt">${esc(p.a)}${p.p?' · '+'¥'.repeat(p.p):''} · ${away(p)}</div></div><div class="stt ${S.c}">${esc(S.s)}</div></button>`}
 function list(){const L=$('list'),V=visible();let h='';
   if(!V.length){L.innerHTML=`<div class="dt empty">nothing matches<br>${st.open?'try turning off “open now”':'try another filter'}</div>`;return}
-  const groups=st.cat==='all'?Object.keys(CATS):[st.cat];const ord=[];
+  const groups=st.cat==='all'?Object.keys(CATS):st.cat==='film'?['film','loo']:[st.cat];const ord=[];
   groups.forEach(k=>{const g=V.filter(p=>p.c===k).sort((a,b)=>km(origin(),a)-km(origin(),b));if(!g.length)return;h+=`<div class="gh" style="color:${CATS[k].c}"><span>${CATS[k].n}</span><span class="dt">${g.length}</span></div>`;g.forEach(p=>{h+=rowHtml(p,ord.length);ord.push(p)})});
   L.innerHTML=`<div class="dt" style="margin-top:12px">nearest first · from ${you?'you':'home'}</div>`+h;L.querySelectorAll('.row').forEach(b=>b.onclick=()=>spotSheet(ord[+b.dataset.i]))}
 
