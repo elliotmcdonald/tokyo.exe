@@ -1,4 +1,4 @@
--- tokyo.exe sync setup: paste into Supabase → SQL Editor → New query → Run
+-- map.py (tokyo.exe repo) sync setup: paste into Supabase → SQL Editor → New query → Run
 -- Uses the same project, logins and members list as quest.exe, so there is nothing to edit.
 
 create table if not exists public.tokyo_docs (
