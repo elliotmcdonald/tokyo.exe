@@ -197,35 +197,26 @@ addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(st)
 const allSpots=()=>SPOTS.concat(st.custom).filter(p=>!st.hidden[p.id]);
 const byId=id=>SPOTS.find(p=>p.id===id)||st.custom.find(p=>p.id===id);
 
-/* ---------- sound: koto plucks, wood clicks, a temple rin ---------- */
-let AC,M;
-function ac(){if(AC)return AC;AC=new(window.AudioContext||window.webkitAudioContext)();M=AC.createGain();M.gain.value=1.4;
-  const cp=AC.createDynamicsCompressor();cp.threshold.value=-16;cp.knee.value=10;cp.ratio.value=4;cp.attack.value=.003;cp.release.value=.25;cp.connect(AC.destination);
-  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5200;const dl=AC.createDelay();dl.delayTime.value=.23;const fb=AC.createGain();fb.gain.value=.18;const wet=AC.createGain();wet.gain.value=.5;
-  M.connect(lp);lp.connect(cp);lp.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(cp);return AC}
-const N={D4:293.66,Eb4:311.13,G4:392,A4:440,Bb4:466.16,D5:587.33,Eb5:622.25,G5:783.99,A5:880,Bb5:932.33,D6:1174.66};
-const KS={};
-function kotoBuf(f){const k=Math.round(f);if(KS[k])return KS[k];const a=ac(),sr=a.sampleRate,n=Math.floor(sr*1.6),b=a.createBuffer(1,n,sr),d=b.getChannelData(0),p=Math.max(2,Math.round(sr/f)),r=new Float32Array(p);
-  let pv=0;for(let i=0;i<p;i++){pv=pv*.35+(Math.random()*2-1)*.65;r[i]=pv}
-  const damp=.9965;for(let i=0;i<n;i++){const j=i%p,q=(i+1)%p;d[i]=r[j]*(i<40?i/40:1);r[j]=damp*(.62*r[j]+.38*r[q])}
-  return KS[k]=b}
-function koto(f,t0=0,v=.5){const a=ac(),src=a.createBufferSource(),g=a.createGain(),t=a.currentTime+t0;src.buffer=kotoBuf(f);src.playbackRate.setValueAtTime(1.012,t);src.playbackRate.exponentialRampToValueAtTime(1,t+.06);
-  g.gain.value=v;src.connect(g).connect(M);src.start(t)}
-function noise(t0,du,v,freq,q){const a=ac(),n=Math.floor(a.sampleRate*du),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
-  const src=a.createBufferSource(),bp=a.createBiquadFilter(),g=a.createGain();src.buffer=b;bp.type='bandpass';bp.frequency.value=freq;bp.Q.value=q;g.gain.value=v;src.connect(bp).connect(g).connect(M);src.start(a.currentTime+t0)}
-function sine(f,t0,du,v,to){const a=ac(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+du*.8);
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+du);o.connect(g).connect(M);o.start(t);o.stop(t+du+.05)}
-const wood=(t0=0,v=.05,f=1650)=>{noise(t0,.035,v*3,f*1.6,6);sine(f,t0,.06,v,f*.62)};
-function rin(f=830,t0=0,v=.05,len=2.6){[[1,1,len],[2.71,.45,len*.7],[5.15,.2,len*.4],[8.4,.08,len*.25]].forEach(([r,a,du])=>{sine(f*r,t0,du,v*a);sine(f*r+1.3,t0,du,v*a*.6)})}
-const hanko=(t0=0)=>{sine(140,t0,.16,.12,58);noise(t0,.05,.18,700,1.2)};
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-const SFX={intro:()=>{sine(523.25,0,1,.07);sine(1046.5,0,.5,.012);sine(783.99,.18,1.4,.07);sine(1567.98,.18,.7,.014)},
-  pop:()=>koto(pick([N.A4,N.D5,N.G5,N.A5]),0,.42),
-  open:()=>{koto(N.D5,0,.34);koto(N.A5,.07,.3)},
-  add:()=>{[N.G4,N.A4,N.D5].forEach((f,i)=>koto(f,i*.09,.4));rin(1245,.3,.022,1.4)},
-  tap:()=>wood(0,.09,pick([1500,1650,1800])),
-  undo:()=>{koto(N.A4,0,.38);koto(N.Eb4,.12,.38)},
-  grant:()=>{hanko(0);rin(830,.08,.06,3.2)}};
+/* ---------- sound: quiet, soft, tactile (asmr-ish) ---------- */
+let AC,M;const KS={};
+function ac(){if(AC)return AC;AC=new(window.AudioContext||window.webkitAudioContext)();M=AC.createGain();M.gain.value=1;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;lp.Q.value=.3;const cp=AC.createDynamicsCompressor();cp.threshold.value=-20;cp.ratio.value=3;
+  M.connect(lp);lp.connect(cp);cp.connect(AC.destination);return AC}
+function noise(t0,du,v,f0,f1,q=1.2,atk=.002){const a=ac(),n=Math.floor(a.sampleRate*du),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+  const src=a.createBufferSource(),bp=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+t0;src.buffer=b;bp.type='bandpass';bp.Q.value=q;bp.frequency.setValueAtTime(f0,t);bp.frequency.exponentialRampToValueAtTime(f1||f0,t+du);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+atk);g.gain.exponentialRampToValueAtTime(.0001,t+du);src.connect(bp).connect(g).connect(M);src.start(t);src.stop(t+du+.02)}
+function sine(f,t0,du,v,to,atk=.006){const a=ac(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+du*.7);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+atk);g.gain.exponentialRampToValueAtTime(.0001,t+du);o.connect(g).connect(M);o.start(t);o.stop(t+du+.05)}
+const r6=f=>f*(1+(Math.random()-.5)*.08);
+const click=(t0=0,v=1.4)=>noise(t0,.016,v,r6(2600),0,1.6,.001);
+const bloop=(t0=0,v=.13,f=520,to=360)=>{sine(r6(f),t0,.09,v,r6(to),.004);click(t0,v*4)};
+const SFX={intro:()=>{sine(392,0,1.6,.07,0,.25);sine(587.33,.05,1.5,.05,0,.3);noise(0,.9,.12,500,1400,.8,.35)},
+  tap:()=>click(0,1.6),
+  pop:()=>bloop(0,.3),
+  open:()=>{noise(0,.2,.5,700,2200,1,.06)},
+  add:()=>{bloop(0,.1,480,340);bloop(.09,.1,620,440)},
+  undo:()=>bloop(0,.33,440,300),
+  grant:()=>{sine(150,0,.16,.3,70,.003);noise(0,.06,.6,380,0,.9,.002);bloop(.2,.09,660,500)}};
 window.__snd={SFX,reset:()=>{AC=null;for(const k in KS)delete KS[k]}};
 const sfx=k=>{if(!st.snd)return;try{if(AC&&AC.state==='suspended')AC.resume();SFX[k]()}catch(e){}};
 
