@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" style="background:#1B2033">
+<html lang="en" style="background:#251B23">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="tokyo.exe">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1B2033">
+<meta name="theme-color" content="#251B23">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -26,7 +26,7 @@
 <link rel="apple-touch-startup-image" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/420x912@3.png">
 <style>
 @font-face{font-family:"DotGothic16";src:url("fonts/dotgothic16.woff2") format("woff2");font-display:swap}
-:root{--bg:#1B2033;--bg2:#11162A;--fg:#F3EBDD;--mut:#A7ADC4;--acc:#E5583F;--ln:#343C5C;--gold:#E8B547;--ok:#7FD08A;--px:'DotGothic16',ui-monospace,monospace;--g:max(18px,env(safe-area-inset-left,0px));--gr:max(18px,env(safe-area-inset-right,0px));color-scheme:dark}
+:root{--bg:#251B23;--bg2:#180F17;--fg:#F2E4EA;--mut:#9B8795;--acc:#E5583F;--ln:#41303D;--gold:#E8B547;--ok:#7FD08A;--px:'DotGothic16',ui-monospace,monospace;--g:max(18px,env(safe-area-inset-left,0px));--gr:max(18px,env(safe-area-inset-right,0px));color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--px);overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -53,9 +53,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #mv{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 #mv img{display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
 #lbl,#pins{position:absolute;inset:0;pointer-events:none}
-.lb{position:absolute;font-size:10px;letter-spacing:1px;color:var(--fg);background:rgba(27,32,51,.72);padding:1px 4px;white-space:nowrap;transform:translate(-50%,5px)}
-.lb.mj{font-size:11px;background:rgba(27,32,51,.85)}
-.lb.lm{transform:translate(-50%,calc(-100% - 6px));color:var(--gold);background:rgba(27,32,51,.8)}.lb.lm::after{top:auto;bottom:-5px;background:var(--gold)}
+.lb{position:absolute;font-size:10px;letter-spacing:1px;color:var(--fg);background:rgba(37,27,35,.72);padding:1px 4px;white-space:nowrap;transform:translate(-50%,5px)}
+.lb.mj{font-size:11px;background:rgba(37,27,35,.85)}
+.lb.lm{transform:translate(-50%,calc(-100% - 6px));color:var(--gold);background:rgba(37,27,35,.8)}.lb.lm::after{top:auto;bottom:-5px;background:var(--gold)}
 .lb::after{content:'';position:absolute;left:50%;top:-5px;width:3px;height:3px;margin-left:-1px;background:var(--fg)}
 .pin{position:absolute;left:0;top:0;width:21px;height:24px;margin:-24px 0 0 -10px;transition:none}
 .pin svg{display:block}
@@ -127,7 +127,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
 .ring{width:86px;height:86px;border-radius:50%;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px}
 .ring small{font-size:9px;letter-spacing:1px;margin-top:4px}
 .stamp span{font-size:10px;letter-spacing:1px;line-height:1.4}
-.slam{position:absolute;left:50%;top:40%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:5px solid var(--gold);color:var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;z-index:40;pointer-events:none;background:rgba(27,32,51,.6)}
+.slam{position:absolute;left:50%;top:40%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:5px solid var(--gold);color:var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;z-index:40;pointer-events:none;background:rgba(37,27,35,.6)}
 .slam small{font-size:11px;letter-spacing:2px;margin-top:6px}
 .spl{position:absolute;inset:0;z-index:50;background:var(--bg);cursor:pointer}
 .spl .tor{position:absolute;left:50%;top:calc(34% + 4px);width:112px;height:96px;margin-left:-56px;animation:bob 1.6s steps(5) infinite alternate}
@@ -150,9 +150,9 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
   </div>
   <div class="hd">
     <div class="logo" id="logo" role="button" aria-label="Sync">tokyo<b>.</b>exe<i class="syd" id="syd" hidden></i></div>
-    <button class="pb" id="bsrch" aria-label="Search saved spots"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M2 0h4v1H2z M1 1h1v1H1z M6 1h1v1H6z M0 2h1v4H0z M7 2h1v4H7z M1 6h1v1H1z M6 6h1v1H6z M2 7h4v1H2z M7 7h1v1H7z M8 8h1v1H8z M9 9h1v1H9z M10 10h1v1h-1z"/></svg></button>
+    <button class="pb" id="bsrch" aria-label="Search saved spots"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M2 0h4v1H2z M1 1h1v1H1z M6 1h1v1H6z M0 2h1v4H0z M7 2h1v4H7z M1 6h1v1H1z M6 6h1v1H6z M2 7h4v1H2z M7 7h1v1H7z M8 8h1v1H8z M9 9h1v1H9z M10 10h1v1h-1z"/></svg></button>
     <button class="pb" id="bview" aria-label="Show as list"></button>
-    <button class="pb" id="bstamp" aria-label="Stamp book"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M4 0h4v1H4z M2 1h2v1H2z M8 1h2v1H8z M1 2h1v2H1z M10 2h1v2h-1z M0 4h1v4H0z M11 4h1v4h-1z M1 8h1v2H1z M10 8h1v2h-1z M2 10h2v1H2z M8 10h2v1H8z M4 11h4v1H4z"/><path fill="#E8B547" d="M5 3h2v2H5z M3 5h6v2H3z M5 7h2v2H5z"/></svg></button>
+    <button class="pb" id="bstamp" aria-label="Stamp book"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M4 0h4v1H4z M2 1h2v1H2z M8 1h2v1H8z M1 2h1v2H1z M10 2h1v2h-1z M0 4h1v4H0z M11 4h1v4h-1z M1 8h1v2H1z M10 8h1v2h-1z M2 10h2v1H2z M8 10h2v1H8z M4 11h4v1H4z"/><path fill="#E8B547" d="M5 3h2v2H5z M3 5h6v2H3z M5 7h2v2H5z"/></svg></button>
   </div>
   <div class="sub dt" id="sub"></div>
   <div class="srch" id="srch"><input class="in" id="q" type="search" placeholder="search name, area, note…" autocomplete="off" enterkeyhint="search"></div>
@@ -162,9 +162,9 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
       <div id="mv"><img id="mimg" alt=""></div>
       <div id="pins"></div>
       <div id="lbl"></div>
-      <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
-      <button class="mbtn" id="zout" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M0 3h8v2H0z"/></svg></button>
-      <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
+      <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
+      <button class="mbtn" id="zout" aria-label="Zoom out"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 3h8v2H0z"/></svg></button>
+      <button class="mbtn" id="loc" aria-label="Show where I am"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M5 0h1v3H5z M5 8h1v3H5z M0 5h3v1H0z M8 5h3v1H8z M3 2h5v1H3z M3 8h5v1H3z M2 3h1v5H2z M8 3h1v5H8z"/><path fill="#E5583F" d="M5 5h1v1H5z"/></svg></button>
       <div class="peek" id="peek"></div>
     </div>
     <div class="list" id="list"></div>
@@ -187,7 +187,7 @@ const HOME={lat:35.6707238,lng:139.6710513};
 const TRIP0='2026-10-28',TRIP1='2026-11-23';
 const CATS={coffee:{n:'coffee & tea',c:'#C08A5F',k:'珈琲'},eat:{n:'ramen & food',c:'#E5583F',k:'麺'},markets:{n:'flea & antiques',c:'#E8B547',k:'市'},thrift:{n:'thrift',c:'#F29A5B',k:'古'},
   records:{n:'records',c:'#E77FB0',k:'盤'},jazz:{n:'jazz kissa',c:'#9A8AF2',k:'音'},bars:{n:'bars',c:'#5FC2D9',k:'酒'},craft:{n:'design & craft',c:'#3FB5AA',k:'器'},
-  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F3EBDD',k:'社'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
+  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
 SPOTS.forEach(p=>{if(p.c==='gardens')p.c='sights'});
 const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1],['ikebukuro',139.71094,35.7299,1],['ueno',139.77676,35.71351,1],['tokyo stn',139.76704,35.6813,1],['asakusa',139.797774,35.710746,1],['kichijoji',139.57984,35.70295,1],['shimokitazawa',139.66657,35.6616,1],['nakameguro',139.699116,35.64431,1],['ginza',139.765366,35.6715,1],['akihabara',139.77288,35.69824,1],['koenji',139.64955,35.70518,1],
  ['harajuku',139.70261,35.67129],['ebisu',139.70983,35.64658],['daikanyama',139.703084,35.648043],['jiyugaoka',139.668532,35.60735],['sangenjaya',139.669257,35.644148],['nishi-ogikubo',139.59928,35.70351],['nakano',139.66594,35.70573],['yoyogi-uehara',139.67968,35.66906],['hatagaya',139.6768293,35.6772317],['omotesando',139.712473,35.665042],['akasaka',139.736413,35.672104],['yotsuya',139.73038,35.6849],['ochanomizu',139.7651,35.69935],['jimbocho',139.75756,35.696021],['kuramae',139.790858,35.703128],['kiyosumi-shirakawa',139.799841,35.682119],['monzen-nakacho',139.796099,35.671892],['gotokuji',139.64735,35.65374],['mitaka',139.56067,35.70268],['nezu',139.76575,35.717325],['yanaka',139.7660,35.7262],['komagome',139.74788,35.73684],['oizumi-gakuen',139.58655,35.74952],['ningyocho',139.782339,35.686259],['shinagawa',139.73871,35.6288],['skytree',139.8107,35.7101],['meidaimae',139.65056,35.66836],['sasazuka',139.66718,35.67366],['takadanobaba',139.70371,35.71268],['kagurazaka',139.73452,35.703865],['roppongi',139.731155,35.6628],['oi racecourse',139.747055,35.595025],['tennozu',139.75084,35.62038],['futako-tamagawa',139.627213,35.612226],['kameari',139.84731,35.76629],['odaiba',139.7745,35.6290],['jindaiji',139.5504,35.6675],
@@ -256,8 +256,8 @@ function sub(){const t=tnow(),all=allSpots(),n=all.filter(p=>st.stamps[p.id]).le
 function chips(){const C=$('chips');C.innerHTML=`<button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()}}
-const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F3EBDD" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
-  list:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M0 1h1v9H0z M0 1h3v1H0z M3 2h1v1H3z M4 1h3v1H4z M7 2h1v1H7z M8 1h3v1H8z M10 1h1v9h-1z M0 9h3v1H0z M3 10h1v1H3z M4 9h3v1H4z M7 10h1v1H7z M8 9h3v1H8z"/><path fill="#E5583F" d="M4 4h3v3H4z"/></svg>'};
+const VI={map:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 1h2v2H0z M0 5h2v2H0z M0 9h2v2H0z"/><path fill="#F2E4EA" d="M4 1h7v2H4z M4 5h7v2H4z M4 9h7v2H4z"/></svg>',
+  list:'<svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M0 1h1v9H0z M0 1h3v1H0z M3 2h1v1H3z M4 1h3v1H4z M7 2h1v1H7z M8 1h3v1H8z M10 1h1v9h-1z M0 9h3v1H0z M3 10h1v1H3z M4 9h3v1H4z M7 10h1v1H7z M8 9h3v1H8z"/><path fill="#E5583F" d="M4 4h3v3H4z"/></svg>'};
 function viewBtn(){$('bview').innerHTML=VI[st.view];$('bview').setAttribute('aria-label',st.view==='map'?'Show as list':'Show on map')}
 $('bview').onclick=()=>{sfx('pop');st.view=st.view==='map'?'list':'map';save();refresh()};
 $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(s.classList.contains('o'))setTimeout(()=>$('q').focus(),50);else{q='';$('q').value='';refresh()}};
@@ -275,11 +275,11 @@ function clamp(){const w=MAP.clientWidth,h=MAP.clientHeight,mw=PJ.W*s,mh=PJ.H*s,
   tx=mw+2*pad<w?(w-mw)/2:Math.min(pad,Math.max(w-mw-pad,tx));ty=mh+2*pad<h?(h-mh)/2:Math.min(pad,Math.max(h-mh-pad,ty))}
 function centerOn(mx,my){tx=MAP.clientWidth/2-mx*s;ty=MAP.clientHeight/2-my*s;clamp()}
 let pinEls=[],vis=[],sel=null,raf=0;
-function pinSvg(c,stamped){return `<svg width="21" height="24" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#1B2033" d="M1 0h5v1H1z M0 1h1v3H0z M6 1h1v3H6z M1 4h1v1H1z M5 4h1v1H5z M2 5h1v1H2z M4 5h1v1H4z M3 6h1v1H3z"/><path fill="${c}" d="M1 1h5v3H1z M2 4h3v1H2z M3 5h1v1H3z"/><path fill="${stamped?'#E8B547':'#1B2033'}" d="${stamped?'M2 2h3v1H2z M3 1h1v3H3z':'M3 2h1v1H3z'}"/><path fill="#000" fill-opacity=".3" d="M2 7h3v1H2z"/></svg>`}
+function pinSvg(c,stamped){return `<svg width="21" height="24" viewBox="0 0 7 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#251B23" d="M1 0h5v1H1z M0 1h1v3H0z M6 1h1v3H6z M1 4h1v1H1z M5 4h1v1H5z M2 5h1v1H2z M4 5h1v1H4z M3 6h1v1H3z"/><path fill="${c}" d="M1 1h5v3H1z M2 4h3v1H2z M3 5h1v1H3z"/><path fill="${stamped?'#E8B547':'#251B23'}" d="${stamped?'M2 2h3v1H2z M3 1h1v3H3z':'M3 2h1v1H3z'}"/><path fill="#000" fill-opacity=".3" d="M2 7h3v1H2z"/></svg>`}
 function buildPins(){vis=visible();PINS.innerHTML='';
   pinEls=vis.map(p=>{const [mx,my]=toM(p.lat,p.lng);const e=document.createElement('div');e.className='pin';e.innerHTML=pinSvg((CATS[p.c]||CATS.sights).c,!!st.stamps[p.id]);PINS.appendChild(e);return{p,mx,my,e}});
   const [hx,hy]=toM(HOME.lat,HOME.lng);homeEl={mx:hx,my:hy};
-  LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#1B2033">home</div>'+'<div class="you" id="youd" hidden></div>';
+  LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
@@ -356,7 +356,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
       <button class="mrow" id="wkb"><span class="k">today</span><span class="v">${esc(todayH)}${wk?' ▾':''}</span></button>
       ${wk?`<div class="wk" id="wk">${wk}</div>`:''}
       ${md?`<div class="mrow"><span class="k">market days</span><span class="v" style="color:var(--gold)">${esc(md)}</span></div>`:''}
-      <div class="mrow"><span class="k">price</span><span class="v">${p.p?`<span style="color:var(--gold)">${'¥'.repeat(p.p)}</span><span style="color:#4A5272">${'¥'.repeat(4-p.p)}</span>`:'<span class="c-no">—</span>'}</span></div>
+      <div class="mrow"><span class="k">price</span><span class="v">${p.p?`<span style="color:var(--gold)">${'¥'.repeat(p.p)}</span><span style="color:#5A4552">${'¥'.repeat(4-p.p)}</span>`:'<span class="c-no">—</span>'}</span></div>
       <div class="mrow"><span class="k">from ${you?'you':'home'}</span><span class="v">${away(p)}</span></div>
     </div>
     ${p.t&&p.t.length?`<div class="tags">${p.t.map(x=>`<span class="tag${TAGW.test(x)?' w':''}">${esc(x)}</span>`).join('')}</div>`:''}
