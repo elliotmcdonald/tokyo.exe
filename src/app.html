@@ -229,7 +229,7 @@ const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1]
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={map:'moss',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{},bk:{},plan:{}};
+let st={map:'washi',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{},bk:{},plan:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 st.bk=st.bk||{};st.plan=st.plan||{};
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
@@ -379,9 +379,9 @@ $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(
 $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
-const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl'),MC=$('mcv'),MCX=MC.getContext('2d');let LBLM=null,LBLS=[];
-const THEMES={moss:'#5D99A8',kinari:'#9DB5BC',sencha:'#6AACD9',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',washi:'#8EC1D6',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
-if(!THEMES[st.map]||!st.mapPicked||st.mapV!==3){st.map='moss';st.mapV=3}
+const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl'),MC=$('mcv'),MCX=MC.getContext('2d');let LBLM=null,LBLS=[],selLm=-1;
+const THEMES={washi:'#8EC1D6',moss:'#5D99A8',kinari:'#9DB5BC',sencha:'#6AACD9',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
+if(!THEMES[st.map]||!st.mapPicked||st.mapV!==4){st.map='washi';st.mapV=4}
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toP=(lat,lng)=>{const [x,y]=toM(lat,lng);return[Math.max(12,Math.min(PJ.W-12,x)),Math.max(28,Math.min(PJ.H-6,y))]};
@@ -433,7 +433,7 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   syncMarks();
   for(const m of marks){const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;if(m.on!==on){m.e.style.display=on?'':'none';m.on=on;m.e._on=on}if(on)m.e.style.transform=`translate3d(${x|0}px,${y|0}px,0)`}
   const L=LBL.children;if(!LBLM||LBLM.length!==LABELS.length)LBLM=LABELS.map(l=>toM(l[2],l[1]));
-  for(let i=0;i<LABELS.length;i++){const l=LABELS[i],lm=l[3]===2,x=tx+LBLM[i][0]*s,y=ty+LBLM[i][1]*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;
+  for(let i=0;i<LABELS.length;i++){const l=LABELS[i],lm=l[3]===2,x=tx+LBLM[i][0]*s,y=ty+LBLM[i][1]*s-(lm?l[4]*s:0);const show=(lm?i===selLm:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;
     if(LBLS[i]!==show){L[i].style.display=show?'':'none';LBLS[i]=show}if(show)L[i].style.transform=`translate3d(${x|0}px,${y|0}px,0) ${lm?'translate(-50%,calc(-100% - 6px))':'translate(-50%,5px)'}`}
   const hl=L[LABELS.length];hl.style.transform=`translate3d(${(tx+homeEl.mx*s)|0}px,${(ty+homeEl.my*s)|0}px,0) translate(-50%,5px)`;
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
@@ -464,12 +464,91 @@ const LMREAL={'mt fuji (far away)':[35.3606,138.7274,'about 2½ hours from tokyo
 function lmAt(x,y){const R=MAP.getBoundingClientRect();let best=null;
   LABELS.forEach((l,i)=>{if(l[3]!==2)return;const [mx,my]=toM(l[2],l[1]),ax=tx+mx*s,ay=ty+my*s,hg=(l[4]||6)*s;let hit=false;
     const e=LBL.children[i];if(e&&e.style.display!=='none'){const r=e.getBoundingClientRect();if(x>=r.left-R.left-6&&x<=r.right-R.left+6&&y>=r.top-R.top-8&&y<=r.bottom-R.top+8)hit=true}
-    const w=Math.max(14,7*s);if(Math.abs(x-ax)<w&&y>ay-hg-6&&y<ay+Math.max(8,3*s))hit=true;
+    const w=Math.max(16,8*s);if(Math.abs(x-ax)<w&&y>ay-hg-10&&y<ay+Math.max(10,4*s))hit=true;
     if(hit){const dd=Math.hypot(x-ax,y-(ay-hg/2));if(!best||dd<best.d)best={l,d:dd}}});return best&&best.l}
-function lmSheet(l){sfx('pop');const real=LMREAL[l[0]],lat=real?real[0]:l[2],lng=real?real[1]:l[1],pt={lat,lng};
+const LMDESC={
+'hachiko + scramble':'the world’s busiest crossing, with the statue of hachikō, the loyal dog who waited here for his owner for nearly ten years',
+'kabukicho':'shinjuku’s neon nightlife district · a little visitor has landed on this rooftop',
+'kappabashi chef':'the giant chef’s head on the niimi building marks kitchen town · knives, ceramics and plastic food samples',
+'meiji jingu':'a forested shrine to emperor meiji, reached through huge cypress torii · calm even on busy days',
+'senso-ji':'tokyo’s oldest temple, through the thunder gate and nakamise street · lovely lit up at night',
+'imperial palace':'the emperor’s residence, behind moats and stone walls · the east gardens are free to walk',
+'rainbow bridge':'suspension bridge to odaiba · walk across for bay views, or see it lit from odaiba beach',
+'tokyo tower':'the red-and-white 1958 tower · the main deck is great at dusk, with zojoji temple at its feet',
+'gotokuji (cat temple)':'the birthplace of the maneki-neko · thousands of little beckoning cats fill the temple shelves',
+'ghibli museum':'studio ghibli’s whimsical museum in inokashira park · tickets must be booked ahead',
+'ueno zoo':'japan’s oldest zoo, home of the giant pandas, inside ueno park',
+'tokyo dome':'the baseball stadium of the giants, with a small amusement park beside it',
+'sumo hall':'ryogoku kokugikan, the national sumo arena · ryogoku is full of chanko hotpot restaurants',
+'wako clock':'the 1932 clock tower on ginza’s main crossing · the symbol of ginza',
+'roppongi hills':'mori tower with tokyo city view and the mori art museum on top',
+'sunshine 60':'ikebukuro’s tower with an observatory, aquarium and huge shopping centre',
+'carrot tower':'sangenjaya’s orange tower with a free viewing floor on the 26th',
+'big sight':'the upside-down pyramids of tokyo’s biggest convention centre',
+'fuji tv':'the tv headquarters with the giant silver sphere, in odaiba',
+'swan boats':'rent a swan boat on inokashira pond · cherry trees hang over the water',
+'electric town':'akihabara · electronics, retro games, anime and maid cafés',
+'tsukiji market':'the outer market lives on · tamagoyaki, fresh sushi and knife shops, best in the morning',
+'koenji live houses':'koenji’s tiny music venues, vintage shops and bars · tokyo’s punk heart',
+'tocho towers':'the twin government towers with free observation decks · fuji on clear days',
+'denkiyu sento':'the century-old bathhouse from perfect days · fruit milk after a soak',
+'sakurabashi':'the x-shaped footbridge over the sumida river, with skytree behind',
+'yoyogi hachimangu':'quiet hilltop shrine from perfect days, with resident cats',
+'yanaka cats':'old-tokyo yanaka, known for its street cats and old wooden houses',
+'nakano broadway':'a mall stacked with collector shops: vintage toys, watches, manga and figures',
+'statue of liberty':'a replica of lady liberty on odaiba beach, with rainbow bridge behind',
+'kiyosumi garden':'a stroll garden with stepping stones across a big pond · turtles and herons',
+'takeshita street':'harajuku’s crowded strip of crêpes, cute fashion and candy',
+'todoroki valley':'a ravine trail along a stream, hidden in setagaya · cool and green',
+'tomioka hachimangu':'a big edo-era shrine famous for its flea and antique markets',
+'kameido tenjin':'a shrine with drum bridges over a pond · famous for wisteria in spring',
+'tropical dome':'yumenoshima’s glass greenhouse dome of tropical plants',
+'teamlab planets':'immersive digital art you wade through barefoot · book ahead',
+'tsukishima monja':'monja street · dozens of places frying runny monjayaki on hot plates',
+'mt fuji (far away)':'japan’s highest peak · on clear winter mornings it’s visible from tokyo’s towers and hills',
+'nezu torii tunnel':'nezu shrine’s winding tunnel of small red torii, climbing the hillside',
+'golden gai':'six alleys of tiny bars, most seating just a handful of people',
+'omoide yokocho':'“memory lane” · smoky yakitori stalls under red lanterns by shinjuku station',
+'ameyoko':'a lively market street under the train tracks · snacks, seafood and bargains',
+'jimbocho books':'tokyo’s book town · street carts and over a hundred secondhand bookshops',
+'bonus track':'a small village of independent shops and cafés on the old railway line in shimokitazawa',
+'yanaka ginza steps':'the “sunset steps” leading down into yanaka’s old shopping street',
+'zojoji + jizo':'the temple beside tokyo tower, with rows of little jizo statues in red caps and pinwheels',
+'hamarikyu':'a tidal garden by the bay with a teahouse on the pond · try matcha and a sweet',
+'toden arakawa':'tokyo’s last streetcar line · the one-car tram rattles through the old neighbourhoods',
+'hanazono inari':'a short tunnel of red torii down to a tiny shrine, hidden in ueno park',
+'hatonomori hachiman':'a quiet neighbourhood shrine with a fujizuka, a mini mount fuji you can climb',
+'shinagawa shrine':'a hilltop shrine whose stone torii has dragons carved around its pillars',
+'oji inari':'a hillside fox shrine, the old head of the inari shrines around tokyo',
+'toyokawa inari':'a temple garden filled with hundreds of stone foxes in red bibs',
+'hie shrine':'its gate has a rare pointed sanno torii, with a red torii tunnel up the back steps',
+'sumo ring shrine':'setagaya hachimangu · an edo-era sumo ring sits in the shrine woods',
+'kuhonbutsu ginkgo':'a quiet temple of nine buddha halls under huge ginkgo trees · golden in late november',
+'tamagawa daishi tunnel':'a small temple hiding a pitch-dark underground passage of buddha statues',
+'omiya hachimangu':'the big forest shrine nicknamed the “belly button of tokyo”',
+'hanegi plum grove':'over 600 plum trees and a small tea house · blossoms from late january',
+'zenpukuji park':'two quiet ponds where kingfishers live · a local favourite',
+'shakujii park':'big ponds with rowboats and a tiny island shrine',
+'senzoku pond':'rowboats and swan boats under arched bridges in ota',
+'himonya park':'a pond with a small shrine, rowboats and a pony and guinea-pig corner',
+'inokashira benzaiten':'the red shrine to the goddess benzaiten on inokashira pond',
+'weather shrine':'kishō jinja, said to be japan’s only shrine to the weather · hung with teru-teru-bōzu dolls',
+'nishi-ogikubo antiques':'a quiet neighbourhood full of little antique and vintage shops',
+'harmonica yokocho':'kichijoji’s tight maze of tiny bars and food stalls by the station',
+'roka koshun-en':'a writer’s old thatched farmhouse in a bamboo grove · free to visit',
+'jindai botanical gardens':'a huge rose garden and a glass greenhouse, next to jindaiji',
+'kyu asakura house':'a 1919 wooden house with a sloping garden of maples, near daikanyama',
+'saigoyama park':'a hilltop park above the meguro river · watch for fuji at sunset on clear days',
+'gohyaku rakanji':'a hall of hundreds of wooden buddhist statues, each with its own face',
+'meguro fudoson':'a big, quiet hillside temple with dragon-mouth water spouts',
+'nature study forest':'a patch of ancient forest in central tokyo · great for birdwatching',
+'gate bridge':'tokyo gate bridge, nicknamed the dinosaur bridge for its shape',
+'ohi docks':'the container terminals of tokyo port, with their giant cranes'};
+
+function lmSheet(l){sfx('pop');selLm=LABELS.indexOf(l);draw();const real=LMREAL[l[0]],lat=real?real[0]:l[2],lng=real?real[1]:l[1],pt={lat,lng};
   const dir=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`,gm=`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   openSh(`<div class="kat" style="color:var(--gold)">✦ landmark</div><div class="big">${esc(l[0])}</div>
-    ${real?`<div class="note">${esc(real[2])}</div>`:''}
+    ${LMDESC[l[0]]?`<div class="note">${esc(LMDESC[l[0]])}</div>`:''}${real?`<div class="note">${esc(real[2])}</div>`:''}
     <div style="margin-top:14px;border-top:1px dashed var(--ln)"><div class="mrow"><span class="k">from ${you?'you':'home'}</span><span class="v">${away(pt)}</span></div></div>
     <div class="acts"><a class="go" id="go" href="${dir}" target="_blank" rel="noopener">take me there ▸</a></div>
     <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="lmc">centre map here</button></div>`);
@@ -563,7 +642,7 @@ function wirePlan(p,mode){const q=id=>document.getElementById(id),box=q('pb');if
 /* ---------- sheets ---------- */
 const sh=$('sh'),bd=$('bd');
 const openSh=h=>{sh.innerHTML='<button class="grip" aria-label="Close"></button>'+h;sh.scrollTop=0;sh.classList.add('o');bd.classList.add('o');sh.querySelector('.grip').onclick=shut};
-const shut=()=>{sh.classList.remove('o');bd.classList.remove('o')};bd.onclick=shut;addEventListener('keydown',e=>{if(e.key==='Escape')shut()});
+const shut=()=>{sh.classList.remove('o');bd.classList.remove('o');if(selLm>=0){selLm=-1;LBLS=[];draw()}};bd.onclick=shut;addEventListener('keydown',e=>{if(e.key==='Escape')shut()});
 const TAGW=/cash|coins|book|call ahead|ticket|advance|closed|only|odd|check|queue|cover|charge|limit|no photos|card|go early|opening/;
 function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=status(p,t),stamped=st.stamps[p.id];
   const todayH=p.dates&&p.dates.length?(p.dates.includes(t.iso)?(p.dh||'market day'):'not a market day'):p.h&&p.h.length===7?(p.h[t.dow]?p.h[t.dow].replace(/,/g,' · ').replace(/-/g,'–'):'closed'):'not listed';
