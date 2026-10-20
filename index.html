@@ -394,7 +394,8 @@ function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const lm=l[3]===2,x=tx+mx*s,y=ty+my*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
   const hl=L[LABELS.length];hl.style.left=(tx+homeEl.mx*s)+'px';hl.style.top=(ty+homeEl.my*s)+'px';
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
-function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(6,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
+const MAXZ=14;
+function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(MAXZ,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
 $('zin').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s*1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
 $('zout').onclick=e=>{e.stopPropagation();sfx('tap');zoomAt(s/1.5,MAP.clientWidth/2,MAP.clientHeight/2);persistView()};
 $('loc').onclick=e=>{e.stopPropagation();sfx('tap');locate(true)};
@@ -406,7 +407,7 @@ MAP.addEventListener('pointerdown',e=>{MAP.setPointerCapture(e.pointerId);P.set(
   if(P.size===1){g={x0:e.clientX,y0:e.clientY,tx0:tx,ty0:ty,t:Date.now(),moved:false};clearTimeout(lpT);lpT=setTimeout(()=>{if(g&&!g.moved&&P.size===1){g.lp=true;longPress(e.clientX,e.clientY)}},560)}
   else if(P.size===2){clearTimeout(lpT);const [a,b]=[...P.values()];g={pinch:true,d0:Math.hypot(a.x-b.x,a.y-b.y),s0:s,mx:((a.x+b.x)/2),my:((a.y+b.y)/2),tx0:tx,ty0:ty,moved:true}}});
 MAP.addEventListener('pointermove',e=>{if(!P.has(e.pointerId)||!g)return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});const r=MAP.getBoundingClientRect();
-  if(g.pinch&&P.size===2){const [a,b]=[...P.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),ns=Math.max(minS(),Math.min(6,g.s0*d/g.d0));const cx=(a.x+b.x)/2-r.left,cy=(a.y+b.y)/2-r.top;const mx=(g.mx-r.left-g.tx0)/g.s0,my=(g.my-r.top-g.ty0)/g.s0;s=ns;tx=cx-mx*s;ty=cy-my*s;clamp();draw()}
+  if(g.pinch&&P.size===2){const [a,b]=[...P.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),ns=Math.max(minS(),Math.min(MAXZ,g.s0*d/g.d0));const cx=(a.x+b.x)/2-r.left,cy=(a.y+b.y)/2-r.top;const mx=(g.mx-r.left-g.tx0)/g.s0,my=(g.my-r.top-g.ty0)/g.s0;s=ns;tx=cx-mx*s;ty=cy-my*s;clamp();draw()}
   else if(!g.pinch){const dx=e.clientX-g.x0,dy=e.clientY-g.y0;if(Math.abs(dx)+Math.abs(dy)>6){g.moved=true;clearTimeout(lpT)}if(g.moved){tx=g.tx0+dx;ty=g.ty0+dy;clamp();draw()}}});
 const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);clearTimeout(lpT);
   if(g&&!g.moved&&!g.lp&&P.size===0&&Date.now()-g.t<400){const r=MAP.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,now=Date.now();
@@ -421,7 +422,7 @@ function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').
   if(near.length>1)return chooser(near.map(m=>m.items[0]).sort((a,b)=>(a.c==='loo')-(b.c==='loo')));select(top.items[0])}
 function openCluster(m){sfx('tap');const xs=m.items.map(p=>toP(p.lat,p.lng));const x0=Math.min(...xs.map(a=>a[0])),x1=Math.max(...xs.map(a=>a[0])),y0=Math.min(...xs.map(a=>a[1])),y1=Math.max(...xs.map(a=>a[1]));
   const w=MAP.clientWidth,h=MAP.clientHeight,fit=Math.min(w*.7/Math.max(1,x1-x0),h*.55/Math.max(1,y1-y0));
-  flyTo((x0+x1)/2,(y0+y1)/2,Math.min(6,Math.max(CL+.05,fit)))}
+  flyTo((x0+x1)/2,(y0+y1)/2,Math.min(MAXZ,Math.max(CL+.05,fit)))}
 function flyTo(mx,my,ns){const s0=s,c0=[(MAP.clientWidth/2-tx)/s,(MAP.clientHeight/2-ty)/s],t0=performance.now(),D=320;
   const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);s=s0*Math.pow(ns/s0,e);centerOn(c0[0]+(mx-c0[0])*e,c0[1]+(my-c0[1])*e);draw();if(k<1)requestAnimationFrame(step);else{st.z=s;persistView()}};requestAnimationFrame(step)}
 function select(p,center){sfx('pop');sel=p;peek();if(center){const [mx,my]=toP(p.lat,p.lng);if(s<2.4)s=2.4;centerOn(mx,my)}draw()}
