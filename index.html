@@ -309,30 +309,39 @@ async function wxLoad(force){if(!force&&WX&&Date.now()-WX.at<30*60e3)return;
     j.daily.time.forEach((d,i)=>WX.days[d]={c:j.daily.weather_code[i],hi:Math.round(j.daily.temperature_2m_max[i]),lo:Math.round(j.daily.temperature_2m_min[i]),pp:j.daily.precipitation_probability_max?j.daily.precipitation_probability_max[i]:null});
     try{localStorage.setItem('tokyoexe.wx',JSON.stringify(WX))}catch(e){}sub();wxFx();if(st.view==='plan')planView()}catch(e){}}
 /* pixel rain / snow over the map when it's actually raining in tokyo (preview: ?rain=1, ?rain=storm, ?rain=snow) */
-let wxMode=null,rainRAF=0,drops=[],splashes=[],flashT=0;
+let wxMode=null,rainRAF=0,drops=[],splashes=[],flashT=0,bolt=null;
 function wxFx(){const cv=$('rain');if(!cv)return;const force=new URLSearchParams(location.search).get('rain');let m=null;
-  if(force)m=force==='snow'?'snow':force==='storm'?'storm':force==='drizzle'?'drizzle':'rain';
-  else if(WX&&WX.cur&&Date.now()-WX.at<3*3600e3){const c=WX.cur.c;m=c>=95?'storm':((c>=71&&c<=77)||c===85||c===86)?'snow':(c===51||c===53||c===61||c===80)?'drizzle':((c>=51&&c<=67)||(c>=80&&c<=82))?'rain':null}
+  if(force)m=force==='storm'?'storm':force==='drizzle'?'drizzle':'rain';
+  else if(WX&&WX.cur&&Date.now()-WX.at<3*3600e3){const c=WX.cur.c;m=c>=95?'storm':(c===51||c===53||c===61||c===80)?'drizzle':((c>=51&&c<=67)||(c>=80&&c<=82))?'rain':null}
   try{if(matchMedia('(prefers-reduced-motion: reduce)').matches&&!force)m=null}catch(e){}
-  if(m===wxMode)return;wxMode=m;cancelAnimationFrame(rainRAF);drops=[];splashes=[];
+  if(m===wxMode)return;wxMode=m;cancelAnimationFrame(rainRAF);drops=[];splashes=[];bolt=null;flashT=90;
   if(!m){cv.hidden=true;return}cv.hidden=false;rainLoop()}
+function makeBolt(cw,ch){const pts=[];let x=cw*(.15+Math.random()*.7),y=0;const end=ch*(.35+Math.random()*.35);pts.push([x,y]);
+  while(y<end){y+=3+Math.random()*5;x+=(Math.random()-.5)*9;pts.push([x,y])}
+  const br=[];const k=Math.floor(pts.length*(.3+Math.random()*.3));let bx=pts[k][0],by=pts[k][1];br.push([bx,by]);for(let i=0;i<5;i++){by+=3+Math.random()*4;bx+=(Math.random()<.5?-1:1)*(2+Math.random()*4);br.push([bx,by])}
+  return {pts,br,t:0}}
+function strokePix(x,pts){for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i],n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))|0;for(let j=0;j<=n;j++){const t=n?j/n:0;x.fillRect(Math.round(x0+(x1-x0)*t),Math.round(y0+(y1-y0)*t),1,1)}}}
 function rainLoop(){const cv=$('rain');rainRAF=requestAnimationFrame(rainLoop);if(document.hidden||st.view!=='map')return;
   const PX=2,cw=Math.ceil(MAP.clientWidth/PX),ch=Math.ceil(MAP.clientHeight/PX);if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
-  const x=cv.getContext('2d');x.clearRect(0,0,cw,ch);const snow=wxMode==='snow';
-  const n=wxMode==='drizzle'?40:snow?70:wxMode==='storm'?150:95;
-  while(drops.length<n)drops.push({x:Math.random()*(cw+30),y:Math.random()*ch-ch*.2,e:Math.random()*ch,v:snow?.18+Math.random()*.22:(wxMode==='drizzle'?1.5:2.3)+Math.random()*1.1,l:wxMode==='drizzle'?2:3+(Math.random()<.4?1:0),s:Math.random()*6.28});
+  const x=cv.getContext('2d');x.clearRect(0,0,cw,ch);
+  const dark=st.map==='night',storm=wxMode==='storm',driz=wxMode==='drizzle';
+  const drop=dark?'rgba(205,224,248,.75)':'rgba(58,84,128,.72)',drop2=dark?'rgba(205,224,248,.4)':'rgba(58,84,128,.38)';
+  const n=driz?60:storm?210:150;
+  while(drops.length<n)drops.push({x:Math.random()*(cw+40),y:Math.random()*ch-ch*.3,e:Math.random()*ch,v:(driz?2.2:3.4)+Math.random()*1.6,l:driz?3:5+Math.floor(Math.random()*4),far:Math.random()<.35});
   drops.length=n;
-  const dark=st.map==='night',drop=dark?'rgba(200,220,245,.6)':'rgba(70,98,140,.62)';
-  if(!snow){x.fillStyle=dark?'rgba(10,14,30,.12)':'rgba(40,52,80,.1)';x.fillRect(0,0,cw,ch)}
-  x.fillStyle=snow?(dark?'rgba(255,255,255,.9)':'rgba(255,255,255,.95)'):drop;
-  for(const d of drops){
-    if(snow){d.y+=d.v;d.s+=.025;d.x+=Math.sin(d.s)*.2;if(d.y>ch){d.y=-2;d.x=Math.random()*cw}x.fillRect(Math.round(d.x),Math.round(d.y),1,1);continue}
-    d.y+=d.v;d.x-=d.v*.2;
-    if(d.y>=d.e){splashes.push({x:Math.round(d.x),y:Math.round(d.e),t:7});d.y=-d.l-Math.random()*30;d.x=Math.random()*(cw+30);d.e=Math.random()*ch;continue}
-    for(let k=0;k<d.l;k++)x.fillRect(Math.round(d.x+k*.2),Math.round(d.y)+k,1,1)}
-  if(snow&&!dark){x.fillStyle='rgba(120,135,160,.5)';for(const d of drops)x.fillRect(Math.round(d.x)+1,Math.round(d.y)+1,1,1)}
-  if(!snow){x.fillStyle=drop;for(const p of splashes){p.t--;if(p.t>4)x.fillRect(p.x,p.y-1,1,1);else{x.fillRect(p.x-1,p.y,1,1);x.fillRect(p.x+1,p.y,1,1)}}splashes=splashes.filter(p=>p.t>0)}
-  if(wxMode==='storm'){if(--flashT<0)flashT=60*(7+Math.random()*9);if(flashT<7){x.fillStyle=`rgba(255,255,255,${flashT%3===0?.2:.07})`;x.fillRect(0,0,cw,ch)}}}
+  x.fillStyle=dark?`rgba(8,12,28,${storm?.2:.13})`:`rgba(34,46,74,${storm?.17:driz?.07:.12})`;x.fillRect(0,0,cw,ch);
+  for(const d of drops){const sp=d.far?d.v*.7:d.v;d.y+=sp;d.x-=sp*.22;
+    if(d.y>=d.e){if(!d.far)splashes.push({x:Math.round(d.x),y:Math.round(d.e),t:8});d.y=-d.l-Math.random()*40;d.x=Math.random()*(cw+40);d.e=Math.random()*ch;continue}
+    x.fillStyle=d.far?drop2:drop;const L=d.far?Math.max(2,d.l-2):d.l;for(let k=0;k<L;k++)x.fillRect(Math.round(d.x+k*.22),Math.round(d.y)+k,1,1)}
+  x.fillStyle=drop;for(const p of splashes){p.t--;if(p.t>5){x.fillRect(p.x,p.y-1,1,1)}else if(p.t>2){x.fillRect(p.x-1,p.y,1,1);x.fillRect(p.x+1,p.y,1,1)}else{x.fillRect(p.x-2,p.y,1,1);x.fillRect(p.x+2,p.y,1,1)}}
+  splashes=splashes.filter(p=>p.t>0);
+  if(storm){if(!bolt&&--flashT<0){bolt=makeBolt(cw,ch);flashT=60*(4+Math.random()*7)}
+    if(bolt){const t=bolt.t++,on=t<4||(t>=7&&t<13)||(t>=16&&t<18);
+      if(on){x.fillStyle=`rgba(255,255,240,${t<2?.3:t<9?.14:.08})`;x.fillRect(0,0,cw,ch);
+        x.fillStyle='rgba(255,236,160,.55)';strokePix(x,bolt.pts.map(([a,b])=>[a+1,b]));strokePix(x,bolt.pts.map(([a,b])=>[a-1,b]));
+        x.fillStyle='#FFFFFF';strokePix(x,bolt.pts);x.fillStyle='rgba(255,255,255,.8)';strokePix(x,bolt.br)}
+      if(t>20)bolt=null}}}
+window.__wx={strike:()=>{bolt=null;flashT=0}};
 function wxHead(){if(!WX||!WX.cur)return '';return `<button class="wxh" id="wxh" aria-label="Tokyo weather now"><img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
 function status(p,t=tnow()){
   if(p.dates&&p.dates.length){const dh=(p.dh||'').replace('dawn','6:00');const [a,b]=dh.includes('-')?dh.split('-'):['',''];
