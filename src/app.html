@@ -57,6 +57,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .clu b{position:absolute;right:-9px;top:-7px;min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#251B23;color:#F2E4EA;font-weight:400;font-size:10px;line-height:17px;text-align:center;box-shadow:0 0 0 1.5px #F2E4EA}
 
 
+.pin.loo{width:20px;height:20px;margin:-18px 0 0 -10px;opacity:.85}
 .pin.sel{z-index:3;width:45px;height:45px;margin:-40px 0 0 -22px}
 .ri{width:30px;height:30px;flex:none;image-rendering:pixelated;margin:-4px 0}
 .ptag{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-4px);background:var(--bg);color:var(--fg);font-size:11px;letter-spacing:1px;padding:4px 7px;white-space:nowrap;box-shadow:2px 2px 0 var(--bg2)}
@@ -258,7 +259,7 @@ function away(p){const k=km(origin(),p);if(k<2.2)return `${Math.max(1,Math.round
 /* ---------- filter ---------- */
 let q='';
 function visible(){const t=tnow(),Q=q.trim().toLowerCase();
-  return allSpots().filter(p=>(st.cat==='all'?p.c!=='loo':(p.c===st.cat||(st.cat==='film'&&p.pd)))&&(!st.open||status(p,t).open)&&(!Q||[p.n,p.a,p.note,(CATS[p.c]||{}).n,(st.notes[p.id]||'')].join(' ').toLowerCase().includes(Q)))}
+  return allSpots().filter(p=>(st.cat==='all'?true:(p.c===st.cat||(st.cat==='film'&&p.pd)))&&(!st.open||status(p,t).open)&&(!Q||[p.n,p.a,p.note,(CATS[p.c]||{}).n,(st.notes[p.id]||'')].join(' ').toLowerCase().includes(Q)))}
 
 /* ---------- header ---------- */
 function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter(p=>st.stamps[p.id]).length;let d;
@@ -296,7 +297,11 @@ function buildPins(){vis=visible();markKey='';
   LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 /* zoomed out: nearby spots merge into a numbered tile, loners become small dots. zoomed in: full pins. */
-function computeMarks(){const pts=vis.map(p=>{const [mx,my]=toP(p.lat,p.lng);return{p,mx,my}});
+window.__map={go:(lat,lng,z)=>{s=z;const [x,y]=toM(lat,lng);centerOn(x,y);draw()},pair:()=>{const ms=marks.filter(m=>m.t==='p'&&m.e.style.display!=='none'),r=MAP.getBoundingClientRect();for(const a of ms)for(const q of ms){if(a!==q&&Math.hypot((a.mx-q.mx)*s,(a.my-q.my)*s)<16)return [r.left+tx+a.mx*s,r.top+ty+a.my*s-11,a.items[0].n,q.items[0].n]}return null}};
+function computeMarks(){const LOOZ=2.4,isLoo=p=>p.c==='loo'&&st.cat==='all';
+  const all=vis.map(p=>{const [mx,my]=toP(p.lat,p.lng);return{p,mx,my}}),loos=all.filter(o=>isLoo(o.p)&&(s>=LOOZ||(sel&&o.p.id===sel.id))).map(o=>({t:'p',loo:1,items:[o.p],mx:o.mx,my:o.my})),pts=all.filter(o=>!isLoo(o.p));
+  return computeMarks2(pts).concat(loos)}
+function computeMarks2(pts){
   if(s>=CL)return pts.map(o=>({t:'p',items:[o.p],mx:o.mx,my:o.my}));
   const R=30/s,free=pts.filter(o=>!(sel&&o.p.id===sel.id)),out=[];
   if(sel){const o=pts.find(o=>o.p.id===sel.id);if(o)out.push({t:'p',items:[o.p],mx:o.mx,my:o.my})}
@@ -311,7 +316,7 @@ function markHtml(m){if(m.t==='p'){const p=m.items[0];return `<img src="${icOf(p
   return `<img src="${ICONS[top]||ICONS.sparkle}" alt=""><b>${m.items.length}</b>`}
 function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length;if(key===markKey)return;markKey=key;
   marks=computeMarks();PINS.innerHTML='';marks.forEach(m=>{const e=document.createElement('div');const p=m.items[0];
-    e.className=m.t==='c'?'clu':'pin'+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'');
+    e.className=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'');
     e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
@@ -344,8 +349,8 @@ MAP.addEventListener('wheel',e=>{e.preventDefault();const r=MAP.getBoundingClien
 function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').map(m=>{const px=tx+m.mx*s,py=ty+m.my*s-11;return{m,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<22).sort((a,b)=>a.d-b.d);
   if(!hits.length){if(sel){sel=null;peek();draw()}return}
   const top=hits[0].m;if(top.t==='c')return openCluster(top);
-  const near=hits.filter(h=>h.d-hits[0].d<10&&h.m.t!=='c');
-  if(near.length>1&&s<4.5)return chooser(near.map(h=>h.m.items[0]));select(top.items[0])}
+  const tp=[tx+top.mx*s,ty+top.my*s],near=marks.filter(m=>m.t!=='c'&&m.e&&m.e.style.display!=='none'&&(m===top||Math.hypot(tx+m.mx*s-tp[0],ty+m.my*s-tp[1])<24||hits.some(h=>h.m===m&&h.d<16)));
+  if(near.length>1)return chooser(near.map(m=>m.items[0]).sort((a,b)=>(a.c==='loo')-(b.c==='loo')));select(top.items[0])}
 function openCluster(m){sfx('tap');const xs=m.items.map(p=>toP(p.lat,p.lng));const x0=Math.min(...xs.map(a=>a[0])),x1=Math.max(...xs.map(a=>a[0])),y0=Math.min(...xs.map(a=>a[1])),y1=Math.max(...xs.map(a=>a[1]));
   const w=MAP.clientWidth,h=MAP.clientHeight,fit=Math.min(w*.7/Math.max(1,x1-x0),h*.55/Math.max(1,y1-y0));
   flyTo((x0+x1)/2,(y0+y1)/2,Math.min(6,Math.max(CL+.05,fit)))}
