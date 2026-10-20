@@ -13,7 +13,6 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preload" href="fonts/dotgothic16.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="map.png" as="image">
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/375x667@2.png">
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/414x896@2.png">
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/375x812@3.png">
@@ -159,7 +158,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
   <div class="chips" id="chips"></div>
   <div class="body">
     <div id="map" aria-label="Map of saved spots">
-      <div id="mv"><img id="mimg" src="map.png" alt=""></div>
+      <div id="mv"><img id="mimg" alt=""></div>
       <div id="pins"></div>
       <div id="lbl"></div>
       <button class="mbtn" id="zin" aria-label="Zoom in"><svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F3EBDD" d="M3 0h2v8H3z M0 3h8v2H0z"/></svg></button>
@@ -194,7 +193,7 @@ const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1]
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
+let st={map:'meadow',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
 let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}},150);syncSoon()};
@@ -264,6 +263,9 @@ $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
 const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl');
+const THEMES={meadow:'#4B98DD',washi:'#8EC1D6',night:'#16294D',matcha:'#9FC9C4',pocket:'#306230'};
+if(!THEMES[st.map])st.map='meadow';
+function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toLL=(x,y)=>({lng:PJ.LNG0+x/PJ.KX,lat:PJ.LAT1-y/PJ.KY});
 let s=st.z||2,tx=0,ty=0;
@@ -374,8 +376,9 @@ function stampBook(){sfx('open');const all=allSpots(),done=all.filter(p=>st.stam
   openSh(`<div class="row2" style="margin-top:0"><span class="st" style="margin:0">stamp book</span><span class="dt">${done.length} of ${n}</span></div>
     <div class="prog" style="grid-template-columns:repeat(${seg},1fr)">${Array.from({length:seg},(_,i)=>`<i style="${i<on?'background:var(--gold)':''}"></i>`).join('')}</div>
     ${done.length?`<div class="sgrid">${done.map((p,i)=>{const c=CATS[p.c]||CATS.sights;return `<button class="stamp" data-i="${i}"><div class="ring" style="border-color:${c.c};color:${c.c};transform:rotate(${(i*37%15)-7}deg)">${c.k}<small>${dlong(st.stamps[p.id]).replace(/^\w+ /,'')}</small></div><span>${esc(p.n)}</span></button>`}).join('')}</div>`:`<div class="dt empty">no stamps yet<br>open a spot and tap “stamp”<br>when you’ve been</div>`}
-    <div class="row2" style="margin-top:24px"><button class="dt" id="snd">sound · ${st.snd?'on':'off'}</button><button class="dt" id="syb">sync · ${me?'on':'off'}</button></div>`);
+    <div class="row2" style="margin-top:24px"><button class="dt" id="snd">sound · ${st.snd?'on':'off'}</button><button class="dt" id="mapb">map · ${st.map}</button><button class="dt" id="syb">sync · ${me?'on':'off'}</button></div>`);
   sh.querySelectorAll('.stamp').forEach(b=>b.onclick=()=>{const p=done[+b.dataset.i];shut();setTimeout(()=>{if(st.view!=='map'){st.view='map';refresh()}select(p,true);spotSheet(p)},250)});
+  $('mapb').onclick=()=>{const k=Object.keys(THEMES);st.map=k[(k.indexOf(st.map)+1)%k.length];save();setMap();$('mapb').textContent='map · '+st.map;sfx('tap')};
   $('snd').onclick=()=>{st.snd=!st.snd;save();$('snd').textContent='sound · '+(st.snd?'on':'off');sfx('tap')};$('syb').onclick=syncSheet}
 $('bstamp').onclick=stampBook;
 function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y-MAP.getBoundingClientRect().top-ty)/s;if(mx<0||my<0||mx>PJ.W||my>PJ.H)return;const ll=toLL(mx,my);sfx('pop');
@@ -472,7 +475,7 @@ const spl=$('spl');
 spl.addEventListener('click',()=>{if(spl.dataset.b)return;spl.dataset.b=1;try{ac()}catch(e){}sfx('intro');spl.animate([{opacity:1},{opacity:0}],{duration:600,delay:250,easing:'ease-in-out',fill:'forwards'}).onfinish=()=>spl.hidden=true});
 function boot(){refresh();if(st.cx!=null){centerOn(st.cx,st.cy)}else{const [hx,hy]=toM(HOME.lat+0.004,HOME.lng+0.012);centerOn(hx,hy)}draw()}
 addEventListener('resize',()=>{clamp();draw()});
-if(IMG.complete)boot();else IMG.onload=boot;
+IMG.onload=()=>{if(!booted){booted=true;boot()}else draw()};let booted=false;setMap();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 })();
