@@ -151,6 +151,7 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 .note{font-size:12px;letter-spacing:1px;line-height:1.75;padding:12px 0;border-bottom:1px dashed var(--ln)}
 .wk{font-size:11px;letter-spacing:1px;line-height:1.9;color:var(--mut);padding:4px 0 8px;display:none}.wk.o{display:block}
 .wk b{font-weight:400;color:var(--fg)}
+.drvb{margin-top:12px;width:100%;height:42px;border:2px solid var(--ln);color:var(--fg);font-size:12px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:10px}.drvb .jp{color:var(--gold);font-size:14px;letter-spacing:0}
 .acts{display:flex;gap:14px;align-items:stretch;margin-top:18px}
 .go{flex:1;height:50px;background:var(--fg);color:var(--bg);box-shadow:4px 4px 0 var(--acc);font-size:14px;letter-spacing:1px;display:flex;align-items:center;justify-content:center}
 .go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--acc)}
@@ -583,10 +584,10 @@ function lmList(){const L=$('list'),o=origin(),Q=q.trim().toLowerCase();
 function lmSheet(l){sfx('pop');selLm=LABELS.indexOf(l);draw();const real=LMREAL[l[0]],lat=real?real[0]:l[2],lng=real?real[1]:l[1],pt={lat,lng};
   const dir=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`,gm=`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   openSh(`<div class="kat" style="color:var(--gold)">✦ landmark</div><div class="big">${esc(l[0])}</div>
-    ${LMDESC[l[0]]?`<div class="note">${esc(LMDESC[l[0]])}</div>`:''}${real&&real[2]?`<div class="note">${esc(real[2])}</div>`:''}
+    ${LMDESC[l[0]]?`<div class="note">${esc(LMDESC[l[0]])}</div>`:''}${real&&real[2]?`<div class="note">${esc(real[2])}</div>`:''}<button class="drvb" id="drv"><span class="jp">ここへ</span>show the driver ▸</button>
     <div style="margin-top:14px;border-top:1px dashed var(--ln)"><div class="mrow"><span class="k">from ${you?'you':'home'}</span><span class="v">${away(pt)}</span></div></div>
     <div class="acts"><a class="go" id="go" href="${dir}" target="_blank" rel="noopener">take me there ▸</a></div>
-    <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="lmc">centre map here</button><button id="drv">show the driver</button></div>`);$('drv').onclick=()=>driverCard(l[0],lat,lng);
+    <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="lmc">centre map here</button></div>`);$('drv').onclick=()=>driverCard(l[0],lat,lng);
   $('go').onclick=()=>sfx('tap');$('lmc').onclick=()=>{sfx('tap');shut();const [mx,my]=toM(l[2],l[1]);if(s<3.2)s=3.2;centerOn(mx,my-(l[4]||6)/2);draw();persistView()}}
 function tapAt(x,y){const hits=marks.filter(m=>m.e&&m.e.style.display!=='none').map(m=>{const px=tx+m.mx*s,py=ty+m.my*s-11;return{m,d:Math.hypot(px-x,py-y)}}).filter(h=>h.d<22).sort((a,b)=>a.d-b.d);
   if(!hits.length){const lm=lmAt(x,y);if(lm)return lmSheet(lm);if(sel){sel=null;peek();draw()}return}
@@ -688,6 +689,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
   openSh(`<div class="kat" style="color:${c.c}"><img class="ri" src="${icOf(p)}" alt="" style="width:30px;height:30px">${esc(c.n)}</div>
     <div class="big">${esc(p.n)}</div><div class="area">${esc(p.a)}</div>
     <div class="status ${S.c}"><i style="background:currentColor"></i>${esc(S.s)}</div>
+    <button class="drvb" id="drv"><span class="jp">ここへ</span>show the driver ▸</button>
     <div style="margin-top:14px;border-top:1px dashed var(--ln)">
       <button class="mrow" id="wkb"><span class="k">today</span><span class="v">${esc(todayH)}${wk?' ▾':''}</span></button>
       ${wk?`<div class="wk" id="wk">${wk}</div>`:''}
@@ -700,7 +702,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
     <div id="pb">${planBlock(p)}</div>
     <div class="note"><span class="dt">our note</span><textarea class="in" id="nt" rows="2" placeholder="add a note for each other…">${esc(st.notes[p.id]||'')}</textarea></div>
     <div class="acts"><a class="go" id="go" href="${dir}" target="_blank" rel="noopener">take me there ▸</a><button class="stb${stamped?' on':''}" id="stb">${stamped?'✦ stamped':'stamp'}</button></div>
-    <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="drv">show the driver</button><button id="hide">${p.custom?'delete spot':'hide spot'}</button></div>`);
+    <div class="lnk"><a href="${gm}" target="_blank" rel="noopener">open in google maps</a><button id="hide">${p.custom?'delete spot':'hide spot'}</button></div>`);
   $('wkb').onclick=()=>{const w=$('wk');if(w){sfx('tap');w.classList.toggle('o')}};wirePlan(p);
   const nt=$('nt');nt.onchange=nt.onblur=()=>{const v=nt.value.trim();if((st.notes[p.id]||'')===v)return;if(v)st.notes[p.id]=v;else delete st.notes[p.id];save()};
   $('go').onclick=()=>sfx('tap');$('drv').onclick=()=>driverCard(p.n,p.lat,p.lng,p.pid);
