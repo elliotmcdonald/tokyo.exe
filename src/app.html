@@ -31,7 +31,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .pb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;transition:transform .12s steps(2)}
 .pb:active{transform:scale(.88)}
 .sub{padding:0 var(--gr) 0 var(--g);margin-top:-2px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.wxh{display:inline-flex;align-items:center;gap:5px;color:var(--fg);letter-spacing:1px;white-space:nowrap}.wxh img{width:20px;height:20px;image-rendering:pixelated}
+.wxh{display:inline-flex;align-items:center;gap:5px;color:var(--fg);letter-spacing:1px;white-space:nowrap;flex:none}.wxh .tk{color:var(--mut);margin-right:3px}
+.sub>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxh img{width:20px;height:20px;image-rendering:pixelated}
 .bkb{margin-top:16px;border:2px dashed var(--ln);padding:12px 12px 14px}
 .bkb .hd2{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;letter-spacing:1px}
 .bkgo{min-height:40px;padding:0 14px;background:var(--gold);color:var(--bg);box-shadow:3px 3px 0 var(--bg2);font-size:12px;letter-spacing:1px;display:inline-flex;align-items:center;white-space:nowrap}
@@ -63,9 +64,11 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 .ch.op{border:1.5px solid var(--ln);padding:3px 8px}.ch.op.on{border-color:var(--ok);color:var(--ok)}.ch.op.on::before{content:none}
 .body{flex:1;position:relative;min-height:0;border-top:2px solid var(--bg2)}
 #map{position:absolute;inset:0;overflow:hidden;touch-action:none;background:#4B98DD;cursor:grab}
-#mv{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#mv{position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden}
+#mcv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
 #mv img{max-width:none!important;max-height:none!important;min-width:0;flex:none;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
 #lbl,#pins{position:absolute;inset:0;pointer-events:none}
+#lbl .lb{left:0;top:0;will-change:transform}
 .lb{position:absolute;font-size:10px;letter-spacing:1px;color:var(--fg);background:rgba(37,27,35,.72);padding:1px 4px;white-space:nowrap;transform:translate(-50%,5px)}
 .lb.mj{font-size:11px;background:rgba(37,27,35,.85)}
 .lb.lm{transform:translate(-50%,calc(-100% - 6px));color:var(--gold);background:rgba(37,27,35,.8)}.lb.lm::after{top:auto;bottom:-5px;background:var(--gold)}
@@ -185,6 +188,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
   <div class="body">
     <div id="map" aria-label="Map of saved spots">
       <div id="mv"><img id="mimg" alt=""></div>
+      <canvas id="mcv"></canvas>
       <canvas id="rain" hidden></canvas>
       <div id="lbl"></div>
       <div id="pins"></div>
@@ -225,7 +229,7 @@ const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1]
 
 /* ---------- state ---------- */
 const KEY='tokyoexe.v1';
-let st={map:'kinari',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{},bk:{},plan:{}};
+let st={map:'moss',snd:true,cat:'all',open:false,view:'map',z:2,cx:null,cy:null,stamps:{},notes:{},custom:[],hidden:{},bk:{},plan:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 st.bk=st.bk||{};st.plan=st.plan||{};
 let sb=null,me=null,live=null,syState='off',syMsg='',syBusy=false,syAgain=false,syT;
@@ -332,7 +336,7 @@ function rainLoop(){const cv=$('rain');rainRAF=requestAnimationFrame(rainLoop);i
         x.fillStyle='#FFFFFF';strokePix(x,bolt.pts);x.fillStyle='rgba(255,255,255,.8)';strokePix(x,bolt.br)}
       if(t>20)bolt=null}}}
 window.__wx={strike:()=>{bolt=null;flashT=0}};
-function wxHead(){if(!WX||!WX.cur)return '';return `<button class="wxh" id="wxh" aria-label="Tokyo weather now"><img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
+function wxHead(){const tm=`<span class="tk">${fm(tnow().min)}</span>`;if(!WX||!WX.cur)return `<button class="wxh" id="wxh" aria-label="Tokyo time">${tm}</button>`;return `<button class="wxh" id="wxh" aria-label="Tokyo time and weather">${tm}<img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
 function status(p,t=tnow()){
   if(p.dates&&p.dates.length){const dh=(p.dh||'').replace('dawn','6:00');const [a,b]=dh.includes('-')?dh.split('-'):['',''];
     if(p.dates.includes(t.iso)){if(a&&t.min<pm(a))return{c:'c-mk',s:`market today · from ${a}`};if(b&&t.min>=pm(b))return{c:'c-no',s:'market over for today'};return{c:'c-ok',s:`market today${b?' · till '+b:''}`,open:1}}
@@ -360,7 +364,7 @@ function visible(){const t=tnow(),Q=q.trim().toLowerCase();
 function sub(){const t=tnow(),all=allSpots().filter(p=>p.c!=='loo'),n=all.filter(p=>st.stamps[p.id]).length;let d;
   if(t.iso<TRIP0){const k=Math.round((Date.parse(TRIP0)-Date.parse(t.iso))/864e5);d=`${k} ${k===1?'day':'days'} to go`}
   else if(t.iso<=TRIP1){const k=Math.round((Date.parse(t.iso)-Date.parse(TRIP0))/864e5)+1;d=`day ${k} of 27`}else d='okaeri';
-  $('sub').innerHTML=`<span>${d} · ${all.length} spots · ${n} stamped</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
+  $('sub').innerHTML=`<span>${d} · ${all.length} spots${n?` · ${n}✦`:''}</span>${wxHead()}`;const w=$('wxh');if(w)w.onclick=()=>{sfx('pop');st.view='plan';planScrolled=0;save();refresh()}}
 function chips(){const C=$('chips');C.innerHTML=`<button class="ch nr${st.near?' on':''}" data-n="1">near me now</button><button class="ch op${st.open?' on':''}" data-o="1">open now</button><button class="ch${st.cat==='all'?' on':''}" data-c="all">all</button>`+Object.entries(CATS).map(([k,c])=>`<button class="ch${st.cat===k?' on':''}" data-c="${k}"><i style="background:${c.c}"></i>${c.n}</button>`).join('');
   C.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{sfx('tap');st.cat=b.dataset.c;st.near=false;save();sel=null;refresh()});
   C.querySelector('[data-o]').onclick=()=>{sfx('tap');st.open=!st.open;save();refresh()};
@@ -375,9 +379,9 @@ $('bsrch').onclick=()=>{sfx('tap');const s=$('srch');s.classList.toggle('o');if(
 $('q').oninput=e=>{q=e.target.value;refresh()};
 
 /* ---------- map ---------- */
-const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl');
-const THEMES={kinari:'#9DB5BC',sencha:'#6AACD9',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',moss:'#5D99A8',washi:'#8EC1D6',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
-if(!THEMES[st.map]||!st.mapPicked||st.mapV!==2){st.map='kinari';st.mapV=2}
+const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl'),MC=$('mcv'),MCX=MC.getContext('2d');let LBLM=null,LBLS=[];
+const THEMES={moss:'#5D99A8',kinari:'#9DB5BC',sencha:'#6AACD9',kiri:'#9AAFB8',hojicha:'#9AABA6',sumi:'#97A3AA',kaki:'#93AAB0',usuzakura:'#9FB6C2',hinoki:'#7FA59A',washi:'#8EC1D6',matcha:'#9FC9C4',snow:'#7DA7CA',night:'#16294D'};
+if(!THEMES[st.map]||!st.mapPicked||st.mapV!==3){st.map='moss';st.mapV=3}
 function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toP=(lat,lng)=>{const [x,y]=toM(lat,lng);return[Math.max(12,Math.min(PJ.W-12,x)),Math.max(28,Math.min(PJ.H-6,y))]};
@@ -392,7 +396,7 @@ function pinSvg(c,stamped){return `<svg width="21" height="24" viewBox="0 0 7 8"
 const CL=3.2;let marks=[],markKey='';
 function buildPins(){vis=visible();markKey='';
   const [hx,hy]=toM(HOME.lat,HOME.lng);homeEl={mx:hx,my:hy};
-  LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
+  LBLS=[];LBLM=null;LBL.innerHTML=LABELS.map(l=>`<div class="lb${l[3]===2?' lm':l[3]?' mj':''}">${l[0]}</div>`).join('')+'<div class="lb mj" style="background:#F28FB0;color:#251B23">home</div>'+'<div class="you" id="youd" hidden></div>';
   draw()}
 /* zoomed out: nearby spots merge into a numbered tile, loners become small dots. zoomed in: full pins. */
 window.__map={open:id=>{const p=allSpots().find(x=>x.id===id);select(p,true);spotSheet(p)},go:(lat,lng,z)=>{s=z;const [x,y]=toM(lat,lng);centerOn(x,y);draw()},pair:()=>{const ms=marks.filter(m=>m.t==='p'&&m.e.style.display!=='none'),r=MAP.getBoundingClientRect();for(const a of ms)for(const q of ms){if(a!==q&&Math.hypot((a.mx-q.mx)*s,(a.my-q.my)*s)<16)return [r.left+tx+a.mx*s,r.top+ty+a.my*s-11,a.items[0].n,q.items[0].n]}return null}};
@@ -412,17 +416,26 @@ function computeMarks2(pts){
 function markHtml(m){if(m.t==='p'){const p=m.items[0];return `<img src="${icOf(p)}" alt="">`+(sel&&p.id===sel.id?`<div class="ptag">${esc(p.n)}</div>`:'')}
   const cnt={};m.items.forEach(p=>{const k=p.ic||CATICON[p.c];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
   return `<img src="${ICONS[top]||ICONS.sparkle}" alt=""><b>${m.items.length}</b>`}
-function syncMarks(){const key=Math.round(s*40)+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length+'|'+Object.keys(st.bk).length;if(key===markKey)return;markKey=key;
-  marks=computeMarks();PINS.innerHTML='';marks.forEach(m=>{const e=document.createElement('div');const p=m.items[0];
-    e.className=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'')+(st.bk[p.id]?' bk':'');
-    e.innerHTML=markHtml(m);m.e=e;PINS.appendChild(e)})}
+function syncMarks(){const key=(s>=CL?'Z':Math.round(Math.log2(s)*10))+'|'+vis.length+'|'+(sel?sel.id:'')+'|'+Object.keys(st.stamps).length+'|'+Object.keys(st.bk).length;if(key===markKey)return;markKey=key;
+  marks=computeMarks();const keep=new Set();
+  for(const m of marks){const p=m.items[0],k=m.t==='c'?'c:'+m.items.length+':'+p.id:'p:'+p.id;
+    const cls=m.t==='c'?'clu':'pin'+(m.loo&&!(sel&&p.id===sel.id)?' loo':'')+(sel&&p.id===sel.id?' sel':'')+(st.stamps[p.id]?' st':'')+(st.bk[p.id]?' bk':''),html=markHtml(m);
+    let e=PPOOL.get(k);if(!e){e=document.createElement('div');e.style.display='none';e._on=false;PPOOL.set(k,e);PINS.appendChild(e)}
+    if(e.className!==cls)e.className=cls;if(e._h!==html){e.innerHTML=html;e._h=html}m.e=e;m.on=e._on;keep.add(k)}
+  for(const [k,e] of PPOOL)if(!keep.has(k)){e.remove();PPOOL.delete(k)}}
+const PPOOL=new Map();
 let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
-  IMG.style.width=PJ.W*s+'px';IMG.style.height=PJ.H*s+'px';MV.style.transform=`translate3d(${tx}px,${ty}px,0)`;
-  const w=MAP.clientWidth,h=MAP.clientHeight;syncMarks();
-  marks.forEach(m=>{const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;m.e.style.display=on?'':'none';if(on)m.e.style.transform=`translate3d(${x}px,${y}px,0)`});
-  const L=LBL.children;LABELS.forEach((l,i)=>{const [mx,my]=toM(l[2],l[1]);const lm=l[3]===2,x=tx+mx*s,y=ty+my*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;L[i].style.display=show?'':'none';if(show){L[i].style.left=x+'px';L[i].style.top=y+'px'}});
-  const hl=L[LABELS.length];hl.style.left=(tx+homeEl.mx*s)+'px';hl.style.top=(ty+homeEl.my*s)+'px';
+  const w=MAP.clientWidth,h=MAP.clientHeight,dpr=Math.min(3,window.devicePixelRatio||1),cw=Math.round(w*dpr),ch=Math.round(h*dpr);
+  if(MC.width!==cw||MC.height!==ch){MC.width=cw;MC.height=ch}
+  MCX.imageSmoothingEnabled=false;MCX.fillStyle=THEMES[st.map]||'#000';MCX.fillRect(0,0,cw,ch);
+  if(IMG.complete&&IMG.naturalWidth)MCX.drawImage(IMG,-tx/s,-ty/s,w/s,h/s,0,0,cw,ch);
+  syncMarks();
+  for(const m of marks){const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;if(m.on!==on){m.e.style.display=on?'':'none';m.on=on;m.e._on=on}if(on)m.e.style.transform=`translate3d(${x|0}px,${y|0}px,0)`}
+  const L=LBL.children;if(!LBLM||LBLM.length!==LABELS.length)LBLM=LABELS.map(l=>toM(l[2],l[1]));
+  for(let i=0;i<LABELS.length;i++){const l=LABELS[i],lm=l[3]===2,x=tx+LBLM[i][0]*s,y=ty+LBLM[i][1]*s-(lm?l[4]*s:0);const show=(lm?s>=3:(l[3]||s>=2.6))&&x>-60&&x<w+60&&y>-20&&y<h+40;
+    if(LBLS[i]!==show){L[i].style.display=show?'':'none';LBLS[i]=show}if(show)L[i].style.transform=`translate3d(${x|0}px,${y|0}px,0) ${lm?'translate(-50%,calc(-100% - 6px))':'translate(-50%,5px)'}`}
+  const hl=L[LABELS.length];hl.style.transform=`translate3d(${(tx+homeEl.mx*s)|0}px,${(ty+homeEl.my*s)|0}px,0) translate(-50%,5px)`;
   const yd=$('youd');if(you){const [mx,my]=toM(you.lat,you.lng);yd.hidden=false;yd.style.left=(tx+mx*s)+'px';yd.style.top=(ty+my*s)+'px'}else yd.hidden=true})}
 const MAXZ=14;
 function zoomAt(ns,px,py){ns=Math.max(minS(),Math.min(MAXZ,ns));const mx=(px-tx)/s,my=(py-ty)/s;s=ns;tx=px-mx*s;ty=py-my*s;clamp();st.z=s;draw()}
@@ -696,6 +709,7 @@ $('logo').onclick=syncSheet;
 sbInit();
 setInterval(()=>{if(!document.hidden){syncSoon(0);sub();if(st.view==='list')list();else if(st.view==='plan')planView();else if(sel)peek();wxLoad()}},60000);
 wxLoad();wxFx();
+(function clock(){setTimeout(()=>{if(!document.hidden)sub();clock()},60000-Date.now()%60000+80)})();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();syncSoon(0)}});
 
 /* ---------- boot ---------- */
