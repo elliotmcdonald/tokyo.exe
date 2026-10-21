@@ -225,14 +225,14 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* ---------- data ---------- */
 const SPOTS=/*SPOTS*/;
 const ICONS=/*ICONS*/;
-const CATICON={coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle',film:'film',loo:'toilet'};
+const CATICON={events:'lantern',coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle',film:'film',loo:'toilet'};
 const icOf=p=>ICONS[p.ic]||ICONS[CATICON[p.c]]||ICONS.sparkle;
 const PJ={W:944,H:659,LNG0:139.515,LAT1:35.775,KX:2817.621126910331,KY:3468.75};
 const HOME={lat:35.6707238,lng:139.6710513};
 const TRIP0='2026-10-28',TRIP1='2026-11-23';
 const CATS={coffee:{n:'coffee & tea',c:'#C08A5F',k:'珈琲'},eat:{n:'ramen & food',c:'#E5583F',k:'麺'},markets:{n:'flea & antiques',c:'#E8B547',k:'市'},thrift:{n:'thrift',c:'#F29A5B',k:'古'},
   records:{n:'records',c:'#E77FB0',k:'盤'},jazz:{n:'jazz kissa',c:'#9A8AF2',k:'音'},bars:{n:'bars',c:'#5FC2D9',k:'酒'},craft:{n:'design & craft',c:'#3FB5AA',k:'器'},
-  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},film:{n:'perfect days',c:'#E8B547',k:'映'},loo:{n:'free toilets',c:'#8CC4E8',k:'WC'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'}};
+  shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},film:{n:'perfect days',c:'#E8B547',k:'映'},loo:{n:'free toilets',c:'#8CC4E8',k:'WC'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'},events:{n:'festivals & events',c:'#F2786B',k:'祭'}};
 SPOTS.forEach(p=>{if(p.c==='gardens')p.c='sights'});
 const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1],['ikebukuro',139.71094,35.7299,1],['ueno',139.77676,35.71351,1],['tokyo stn',139.76704,35.6813,1],['asakusa',139.797774,35.710746,1],['kichijoji',139.57984,35.70295,1],['shimokitazawa',139.66657,35.6616,1],['nakameguro',139.699116,35.64431,1],['ginza',139.765366,35.6715,1],['akihabara',139.77288,35.69824,1],['koenji',139.64955,35.70518,1],
  ['harajuku',139.70261,35.67129],['ebisu',139.70983,35.64658],['daikanyama',139.703084,35.648043],['jiyugaoka',139.668532,35.60735],['sangenjaya',139.669257,35.644148],['nishi-ogikubo',139.59928,35.70351],['nakano',139.66594,35.70573],['yoyogi-uehara',139.67968,35.66906],['hatagaya',139.6768293,35.6772317],['omotesando',139.712473,35.665042],['akasaka',139.736413,35.672104],['yotsuya',139.73038,35.6849],['ochanomizu',139.7651,35.69935],['jimbocho',139.75756,35.696021],['kuramae',139.790858,35.703128],['kiyosumi-shirakawa',139.799841,35.682119],['monzen-nakacho',139.796099,35.671892],['gotokuji',139.64735,35.65374],['mitaka',139.56067,35.70268],['nezu',139.76575,35.717325],['yanaka',139.7660,35.7262],['komagome',139.74788,35.73684],['oizumi-gakuen',139.58655,35.74952],['ningyocho',139.782339,35.686259],['shinagawa',139.73871,35.6288],['skytree',139.8107,35.7101],['meidaimae',139.65056,35.66836],['sasazuka',139.66718,35.67366],['takadanobaba',139.70371,35.71268],['kagurazaka',139.73452,35.703865],['roppongi',139.731155,35.6628],['oi racecourse',139.747055,35.595025],['tennozu',139.75084,35.62038],['futako-tamagawa',139.627213,35.612226],['kameari',139.84731,35.76629],['odaiba',139.7745,35.6290],['jindaiji',139.5504,35.6675],
@@ -359,8 +359,8 @@ window.__wx={strike:()=>{bolt=null;flashT=0}};
 function wxHead(){const tm=`<span class="tk">${fm(tnow().min)}</span>`;if(!WX||!WX.cur)return `<button class="wxh" id="wxh" aria-label="Tokyo time">${tm}</button>`;return `<button class="wxh" id="wxh" aria-label="Tokyo time and weather">${tm}<img src="${ICONS[wxIc(WX.cur.c,WX.cur.day)]}" alt="">${WX.cur.t}°</button>`}
 function status(p,t=tnow()){
   if(p.dates&&p.dates.length){const dh=(p.dh||'').replace('dawn','6:00');const [a,b]=dh.includes('-')?dh.split('-'):['',''];
-    if(p.dates.includes(t.iso)){if(a&&t.min<pm(a))return{c:'c-mk',s:`market today · from ${a}`};if(b&&t.min>=pm(b))return{c:'c-no',s:'market over for today'};return{c:'c-ok',s:`market today${b?' · till '+b:''}`,open:1}}
-    const nx=p.dates.find(d=>d>t.iso);return nx?{c:'c-mk',s:`next market ${dlong(nx)}`}:{c:'c-no',s:'no more dates this trip'}}
+    if(p.dates.includes(t.iso)){if(a&&t.min<pm(a))return{c:'c-mk',s:`${p.c==='events'?'on today':'market today'} · from ${a}`};if(b&&t.min>=pm(b))return{c:'c-no',s:(p.c==='events'?'over for today':'market over for today')};return{c:'c-ok',s:`${p.c==='events'?'on today':'market today'}${b?' · till '+b:''}`,open:1}}
+    const nx=p.dates.find(d=>d>t.iso);return nx?{c:'c-mk',s:`${p.c==='events'?'starts':'next market'} ${dlong(nx)}`}:{c:'c-no',s:'no more dates this trip'}}
   if(!p.h||p.h.length!==7)return{c:'c-no',s:'hours vary · check'};
   const today=ranges(p.h[t.dow]),yest=ranges(p.h[(t.dow+6)%7]);
   for(const [a,b] of yest)if(b>1440&&t.min<b-1440)return{c:b-1440-t.min<=45?'c-soon':'c-ok',s:(b-1440-t.min<=45?'closes soon · ':'open · till ')+fm(b),open:1};
@@ -646,7 +646,7 @@ function planView(){const L=$('list'),t=tnow(),A=allSpots(),ord=[];
     while(pool.length){pool.sort((a,b)=>km(cur,a)-km(cur,b));const n=pool.shift();route.push([n,km(cur,n)]);cur=n}
     h+=`<div class="day${iso===t.iso?' today':''}"${iso===t.iso?' id="today"':''}><div class="dh"><b>${dlong(iso)}</b><span class="wx">${W?`<img src="${ICONS[W.ic]}" alt="">${W.hi}° / ${W.lo}°${W.pp!=null&&W.pp>=30?' · '+W.pp+'% rain':''}`:''}</span></div>`;
     bks.forEach(p=>{const b=st.bk[p.id];h+=row(p,`<span style="color:var(--gold)">✦ booked${b.t?' · '+b.t:''}</span> · ${esc(p.a)}`,closedOn(p,iso)?'closed '+DOW[dw]:'')});
-    mks.forEach(p=>{h+=row(p,`<span style="color:var(--gold)">market day${p.dh?' · '+esc(p.dh.replace('-','–')):wkly(p)?' · '+esc(p.h[dw].replace('-','–')):''}</span> · ${esc(p.a)}`,'')});
+    mks.forEach(p=>{h+=row(p,`<span style="color:var(--gold)">${p.c==='events'?'on today':'market day'}${p.dh?' · '+esc(p.dh.replace('-','–')):wkly(p)?' · '+esc(p.h[dw].replace('-','–')):''}</span> · ${esc(p.a)}`,'')});
     route.forEach(([p,k],i)=>{const hop=i===0?'start':(k<2.2?Math.max(1,Math.round(k*1.25/4.8*60))+' min walk on':k.toFixed(1)+' km on');h+=row(p,`${esc(p.a)} · ${hop}`,closedOn(p,iso)?'closed '+DOW[dw]:'')});
     if(!bks.length&&!mks.length&&!route.length)h+=`<div class="free">free day</div>`;
     h+='</div>'});
@@ -689,7 +689,7 @@ const openSh=h=>{sh.innerHTML='<button class="grip" aria-label="Close"></button>
 const shut=()=>{sh.classList.remove('o');bd.classList.remove('o');if(selLm>=0){selLm=-1;LBLS=[];draw()}};bd.onclick=shut;addEventListener('keydown',e=>{if(e.key==='Escape')shut()});
 const TAGW=/cash|coins|book|call ahead|ticket|advance|closed|only|odd|check|queue|cover|charge|limit|no photos|card|go early|opening/;
 function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=status(p,t),stamped=st.stamps[p.id];
-  const todayH=p.dates&&p.dates.length?(p.dates.includes(t.iso)?(p.dh||'market day'):'not a market day'):p.h&&p.h.length===7?(p.h[t.dow]?p.h[t.dow].replace(/,/g,' · ').replace(/-/g,'–'):'closed'):'not listed';
+  const todayH=p.dates&&p.dates.length?(p.dates.includes(t.iso)?(p.dh||(p.c==='events'?'on today':'market day')):(p.c==='events'?'not on today':'not a market day')):p.h&&p.h.length===7?(p.h[t.dow]?p.h[t.dow].replace(/,/g,' · ').replace(/-/g,'–'):'closed'):'not listed';
   const wk=p.h&&p.h.length===7?DOW.map((d,i)=>`<div style="display:flex;justify-content:space-between"><span>${i===t.dow?'<b>'+d+'</b>':d}</span><span>${i===t.dow?'<b>':''}${p.h[i]?p.h[i].replace(/,/g,' · ').replace(/-/g,'–'):'closed'}${i===t.dow?'</b>':''}</span></div>`).join(''):'';
   const md=p.dates&&p.dates.length?p.dates.filter(d=>d>=t.iso).map(dlong).join(' · ')||'none left this trip':'';
   const dir=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.pid?p.n:p.lat+','+p.lng)}${p.pid?'&destination_place_id='+p.pid:''}&travelmode=transit`;
@@ -697,12 +697,12 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
   openSh(`<div class="kat" style="color:${c.c}"><img class="ri" src="${icOf(p)}" alt="" style="width:30px;height:30px">${esc(c.n)}</div>
     <div class="big">${esc(p.n)}</div><div class="area">${esc(p.a)}</div>
     <div class="status ${S.c}"><i style="background:currentColor"></i>${esc(S.s)}</div>
-    <a class="gml" href="${gm}" target="_blank" rel="noopener"><span>${p.r?`<span class="rt">★ ${p.r.toFixed(1)}</span><small>${p.rc.toLocaleString('en')} reviews</small>`:'<span class="dt">no rating</span>'}</span><span>google maps ↗</span></a>
+    <a class="gml" href="${gm}" target="_blank" rel="noopener"><span>${p.r?`<span class="rt">★ ${p.r.toFixed(1)}</span><small>${p.rc.toLocaleString('en')} reviews</small>`:(p.c==='events'?'<span class="dt">find it on</span>':'<span class="dt">no rating</span>')}</span><span>google maps ↗</span></a>
     <button class="drvb" id="drv"><span class="jp">ここへ</span>show the driver ▸</button>
     <div style="margin-top:14px;border-top:1px dashed var(--ln)">
       <button class="mrow" id="wkb"><span class="k">today</span><span class="v">${esc(todayH)}${wk?' ▾':''}</span></button>
       ${wk?`<div class="wk" id="wk">${wk}</div>`:''}
-      ${md?`<div class="mrow"><span class="k">market days</span><span class="v" style="color:var(--gold)">${esc(md)}</span></div>`:''}
+      ${md?`<div class="mrow"><span class="k">${p.c==='events'?'dates':'market days'}</span><span class="v" style="color:var(--gold)">${esc(md)}</span></div>`:''}
       <div class="mrow"><span class="k">price</span><span class="v">${p.p?`<span style="color:var(--gold)">${'¥'.repeat(p.p)}</span><span style="color:#5A4552">${'¥'.repeat(4-p.p)}</span>`:'<span class="c-no">—</span>'}</span></div>
       <div class="mrow"><span class="k">from ${you?'you':'home'}</span><span class="v">${away(p)}</span></div>
     </div>
