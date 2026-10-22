@@ -98,6 +98,20 @@ select.in{font-size:14px;padding-right:4px}select.in option{background:var(--bg)
 .pin.cl,.clu.cl{opacity:.35;filter:grayscale(1)}.pin.rn{opacity:.28;filter:grayscale(.85)}.row.cl{opacity:.5}
 .ch.rn{border:1.5px solid var(--ln);padding:3px 8px}.ch.rn.on{border-color:#7DA7CA;color:#9FC6E6}.ch.rn.on::before{content:none}
 .lg{display:flex;gap:14px;overflow-x:auto;margin-top:12px;padding-bottom:2px}
+.phch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.phch button{min-height:34px;padding:0 10px;display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:1px;border:1.5px solid var(--ln)}.phch button i{width:7px;height:7px;display:inline-block}.phch button.on{color:var(--bg)}
+.phh{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-bottom:4px;border-bottom:2px solid var(--bg2);font-size:11px;letter-spacing:2px}
+.phr{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--ln)}.phr .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;text-align:left}
+.phr .en{font-size:11px;letter-spacing:1px;color:var(--mut)}.phr .ja{font-size:20px;letter-spacing:1px;line-height:1.3;color:var(--fg)}.phr .ro{font-size:11px;letter-spacing:1px;color:var(--gold)}
+.phb{width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--ln)}.phb.shw{background:var(--fg);border-color:var(--fg);box-shadow:3px 3px 0 var(--acc)}
+.sayit{margin-top:14px;border:2px dashed var(--ln);padding:12px 12px 6px}.sayit .hd2{display:flex;justify-content:space-between;font-size:11px;letter-spacing:2px}
+.sayit .pp{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:6px 10px;background:var(--bg2);margin-top:8px;text-align:left}.sayit .pp b{font-weight:400;font-size:16px;letter-spacing:1px;display:block}.sayit .pp small{font-size:10px;letter-spacing:1px;color:var(--mut)}
+.phshow{position:absolute;inset:0;z-index:45;background:var(--bg);display:flex;flex-direction:column;gap:16px;padding:calc(16px + env(safe-area-inset-top,0px)) var(--gr) calc(26px + env(safe-area-inset-bottom,0px)) var(--g)}
+.phshow .top{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:2px;color:var(--mut)}.phshow .top button{min-height:44px;color:var(--fg);letter-spacing:2px}
+.phcard{flex:1;background:#F3EADB;color:#251B23;box-shadow:0 0 0 3px #251B23,0 0 0 6px #F3EADB,8px 8px 0 6px var(--acc);margin:6px;padding:30px 22px;display:flex;flex-direction:column;justify-content:center;gap:24px;overflow:auto}
+.phcard .pre{font-size:13px;letter-spacing:2px;color:#6E5A66}.phcard .big2{font-size:clamp(30px,11vw,46px);line-height:1.35;letter-spacing:2px;overflow-wrap:anywhere}
+.phcard .low{border-top:2px dashed #CDBBA3;padding-top:16px;display:flex;flex-direction:column;gap:8px}.phcard .low span{font-size:15px;letter-spacing:1px}.phcard .low em{font-style:normal;font-size:13px;letter-spacing:1px;color:#99660F}
+.phnav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.phnav button{height:50px;border:2px solid var(--ln);font-size:13px;letter-spacing:1px;text-align:center}.phnav button.say{background:var(--fg);color:var(--bg);border-color:var(--fg);box-shadow:4px 4px 0 var(--acc)}
+.phshow .ft{text-align:center;font-size:10px;letter-spacing:2px;color:var(--mut)}
 .drv{font-size:30px;line-height:1.35;margin:10px 0 6px;color:var(--fg)}.drva{font-size:22px;line-height:1.5;margin:8px 0;color:var(--fg);word-break:break-all}
 .dayh{display:flex;justify-content:space-between;align-items:baseline;margin-top:24px;padding-bottom:6px;border-bottom:1px dashed var(--ln)}
 .ch.nr{color:var(--fg)}.ch.nr::before{content:'◎';color:var(--acc);margin-right:2px}
@@ -191,6 +205,7 @@ textarea.in{resize:none;font-size:14px;line-height:1.6}
     <button class="pb" id="bsrch" aria-label="Search saved spots"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M2 0h4v1H2z M1 1h1v1H1z M6 1h1v1H6z M0 2h1v4H0z M7 2h1v4H7z M1 6h1v1H1z M6 6h1v1H6z M2 7h4v1H2z M7 7h1v1H7z M8 8h1v1H8z M9 9h1v1H9z M10 10h1v1h-1z"/></svg></button>
     <button class="pb" id="bview" aria-label="Show as list"></button>
     <button class="pb" id="bcal" aria-label="Trip calendar"><svg width="22" height="22" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path fill="#E5583F" d="M0 2h11v2H0z"/><path fill="#F2E4EA" d="M2 0h1v3H2z M8 0h1v3H8z M0 4h1v7H0z M10 4h1v7h-1z M1 10h9v1H1z M2 6h2v1H2z M5 6h1v1H5z M7 6h2v1H7z M2 8h2v1H2z M5 8h1v1H5z"/></svg></button>
+    <button class="pb" id="bphr" aria-label="Phrases"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M1 0h10v1H1z M0 1h1v7H0z M11 1h1v7h-1z M1 8h4v1H1z M7 8h4v1H7z M4 9h2v1H4z M3 10h2v1H3z"/><path fill="#E8B547" d="M2 4h2v2H2z M5 4h2v2H5z M8 4h2v2H8z"/></svg></button>
     <button class="pb" id="bstamp" aria-label="Stamp book"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="#F2E4EA" d="M4 0h4v1H4z M2 1h2v1H2z M8 1h2v1H8z M1 2h1v2H1z M10 2h1v2h-1z M0 4h1v4H0z M11 4h1v4h-1z M1 8h1v2H1z M10 8h1v2h-1z M2 10h2v1H2z M8 10h2v1H8z M4 11h4v1H4z"/><path fill="#E8B547" d="M5 3h2v2H5z M3 5h6v2H3z M5 7h2v2H5z"/></svg></button>
   </div>
   <div class="sub dt" id="sub"></div>
@@ -690,7 +705,7 @@ function wirePlan(p,mode){const q=id=>document.getElementById(id),box=q('pb');if
 
 /* ---------- sheets ---------- */
 const sh=$('sh'),bd=$('bd');
-const openSh=h=>{sh.innerHTML='<button class="grip" aria-label="Close"></button>'+h;sh.scrollTop=0;sh.classList.add('o');bd.classList.add('o');sh.querySelector('.grip').onclick=shut};
+const openSh=h=>{sh.onclick=null;sh.innerHTML='<button class="grip" aria-label="Close"></button>'+h;sh.scrollTop=0;sh.classList.add('o');bd.classList.add('o');sh.querySelector('.grip').onclick=shut};
 const shut=()=>{sh.classList.remove('o');bd.classList.remove('o');if(selLm>=0){selLm=-1;LBLS=[];draw()}};bd.onclick=shut;addEventListener('keydown',e=>{if(e.key==='Escape')shut()});
 const TAGW=/cash|coins|book|call ahead|ticket|advance|closed|only|odd|check|queue|cover|charge|limit|no photos|card|go early|opening/;
 function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=status(p,t),stamped=st.stamps[p.id];
@@ -704,6 +719,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
     <div class="status ${S.c}"><i style="background:currentColor"></i>${esc(S.s)}</div>
     <a class="gml" href="${gm}" target="_blank" rel="noopener"><span>${p.r?`<span class="rt">★ ${p.r.toFixed(1)}</span><small>${p.rc.toLocaleString('en')} reviews</small>`:(p.c==='events'?'<span class="dt">find it on</span>':'<span class="dt">no rating</span>')}</span><span>google maps ↗</span></a>
     <button class="drvb" id="drv"><span class="jp">ここへ</span>show the driver ▸</button>
+    ${(()=>{const k=phFor(p);if(!k)return '';const g=PH[k];return `<div class="sayit"><div class="hd2"><span style="color:var(--gold)">say it here</span><span class="dt">${esc(g.n)}</span></div>${g.l.slice(0,3).map((x,i)=>`<button class="pp" data-ps="${i}"><span style="flex:1"><b>${x[1]}</b><small>${esc(x[0])}</small></span><span style="font-size:11px;color:var(--acc)">show ▸</span></button>`).join('')}<button class="dt" id="phall" data-k="${k}" style="min-height:40px;color:var(--fg)">all ${esc(g.n)} phrases ▸</button></div>`})()}
     <div style="margin-top:14px;border-top:1px dashed var(--ln)">
       <button class="mrow" id="wkb"><span class="k">today</span><span class="v">${esc(todayH)}${wk?' ▾':''}</span></button>
       ${wk?`<div class="wk" id="wk">${wk}</div>`:''}
@@ -720,6 +736,7 @@ function spotSheet(p){sfx('open');const c=CATS[p.c]||CATS.sights,t=tnow(),S=stat
   $('wkb').onclick=()=>{const w=$('wk');if(w){sfx('tap');w.classList.toggle('o')}};wirePlan(p);
   const nt=$('nt');nt.onchange=nt.onblur=()=>{const v=nt.value.trim();if((st.notes[p.id]||'')===v)return;if(v)st.notes[p.id]=v;else delete st.notes[p.id];save()};
   $('go').onclick=()=>sfx('tap');$('drv').onclick=()=>driverCard(p.n,p.lat,p.lng,p.pid);
+  {const k=phFor(p);if(k){sh.querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>phShow(k,+b.dataset.ps));$('phall').onclick=()=>phrases(k)}}
   $('stb').onclick=()=>{if(st.stamps[p.id]){const prev=st.stamps[p.id];delete st.stamps[p.id];save();sfx('undo');refresh();spotSheet(p);toast('stamp removed',()=>{st.stamps[p.id]=prev;save();refresh()});return}
     st.stamps[p.id]=t.iso;save();slam(p);refresh();setTimeout(()=>spotSheet(p),50)};
   let armed=false;$('hide').onclick=()=>{if(!armed){armed=true;sfx('tap');$('hide').textContent='tap again';return}
@@ -753,6 +770,46 @@ function driverCard(name,lat,lng,pid){sfx('open');
     <div class="acts"><a class="go" href="${gm}" target="_blank" rel="noopener">map in japanese ▸</a></div>
     <div class="note">drivers can also tap the address into their sat-nav · most taxis take cards and ic cards</div>`);
   jaAddr(lat,lng).then(v=>{const e=$('ja');if(!e)return;e.innerHTML=v?`${v.n?esc(v.n)+'<br>':''}${esc(v.a)}`:`<span class="dt">couldn’t get the address offline · show the japanese map instead</span>`})}
+
+/* ---------- phrases ---------- */
+const PH={
+ izakaya:{n:'izakaya',k:'居酒屋',c:'#5FC2D9',l:[['two people, please','二人です','futari desu'],['what do you recommend?','おすすめは何ですか？','osusume wa nan desu ka?'],['the bill, please','お会計お願いします','okaikei onegai shimasu'],['do you have space?','空いてますか？','aitemasu ka?'],['draft beer, please','生ビールください','nama bīru kudasai'],['same again, please','おかわりください','okawari kudasai'],['is there a table charge?','お通し代はかかりますか？','otōshi-dai wa kakarimasu ka?'],['cheers!','乾杯！','kanpai!']]},
+ food:{n:'ramen & food',k:'ご飯',c:'#E5583F',l:[['is there an english menu?','英語のメニューはありますか？','eigo no menyū wa arimasu ka?'],['how do i order?','どうやって注文しますか？','dō yatte chūmon shimasu ka?'],['it was delicious, thank you','ごちそうさまでした','gochisōsama deshita'],['firm noodles, please','麺かためでお願いします','men katame de onegai shimasu'],['no spring onion, please','ねぎ抜きでお願いします','negi nuki de onegai shimasu'],['i’m vegetarian','ベジタリアンです','bejitarian desu']]},
+ coffee:{n:'coffee',k:'珈琲',c:'#C08A5F',l:[['for here, please','店内でお願いします','tennai de onegai shimasu'],['to go, please','持ち帰りでお願いします','mochikaeri de onegai shimasu'],['with oat milk, please','オーツミルクでお願いします','ōtsu miruku de onegai shimasu'],['iced, please','アイスでお願いします','aisu de onegai shimasu'],['which beans do you recommend?','おすすめの豆はどれですか？','osusume no mame wa dore desu ka?']]},
+ flea:{n:'flea & antiques',k:'骨董',c:'#E8B547',l:[['how much is this?','これはいくらですか？','kore wa ikura desu ka?'],['could you make it a little cheaper?','少し安くなりますか？','sukoshi yasuku narimasu ka?'],['i’ll take it','これにします','kore ni shimasu'],['can i pick it up?','手に取ってもいいですか？','te ni totte mo ii desu ka?'],['how old is it?','どのくらい古いですか？','dono kurai furui desu ka?'],['can i pay by card?','カードで払えますか？','kādo de haraemasu ka?']]},
+ shops:{n:'thrift & shops',k:'買物',c:'#F29A5B',l:[['can i try this on?','試着してもいいですか？','shichaku shite mo ii desu ka?'],['tax-free, please','免税でお願いします','menzei de onegai shimasu'],['do you have a bigger size?','大きいサイズはありますか？','ōkii saizu wa arimasu ka?'],['a smaller size?','小さいサイズはありますか？','chiisai saizu wa arimasu ka?'],['no bag, thanks','袋は大丈夫です','fukuro wa daijōbu desu'],['just looking, thanks','見ているだけです','mite iru dake desu']]},
+ records:{n:'records',k:'レコード',c:'#E77FB0',l:[['can i listen to this?','試聴できますか？','shichō dekimasu ka?'],['do you have city pop?','シティポップはありますか？','shiti poppu wa arimasu ka?'],['where is the jazz section?','ジャズのコーナーはどこですか？','jazu no kōnā wa doko desu ka?']]},
+ shrines:{n:'shrines',k:'神社',c:'#F2E4EA',l:[['can i get a goshuin stamp?','御朱印をいただけますか？','goshuin o itadakemasu ka?'],['may i take photos?','写真を撮ってもいいですか？','shashin o totte mo ii desu ka?']]},
+ sento:{n:'sento',k:'銭湯',c:'#8CC4E8',l:[['one adult, please','大人一人です','otona hitori desu'],['is it ok with tattoos?','タトゥーがあっても大丈夫ですか？','tatū ga atte mo daijōbu desu ka?'],['can i rent a towel?','タオルを借りられますか？','taoru o kariraremasu ka?']]},
+ basics:{n:'basics',k:'基本',c:'#B5E06A',l:[['excuse me / sorry','すみません','sumimasen'],['thank you very much','ありがとうございます','arigatō gozaimasu'],['where is the toilet?','トイレはどこですか？','toire wa doko desu ka?'],['do you speak english?','英語は話せますか？','eigo wa hanasemasu ka?'],['i don’t speak japanese','日本語が話せません','nihongo ga hanasemasen'],['this one, please','これをください','kore o kudasai'],['can i pay by card?','カードで払えますか？','kādo de haraemasu ka?'],['it’s fine, thank you','大丈夫です','daijōbu desu']]}};
+const phFor=p=>{if(!p)return null;const n=(p.n+' '+(p.note||'')).toLowerCase();if(p.c==='loo')return null;
+  if(/sento|bathhouse|銭湯|-yu\b/.test(n))return 'sento';if(p.c==='cosy'||p.c==='bars'||(p.c==='eat'&&(p.ic==='lantern'||p.ic==='skewer'||/izakaya/.test(n))))return 'izakaya';
+  return {eat:'food',coffee:'coffee',jazz:'coffee',markets:'flea',thrift:'shops',shops:'shops',craft:'shops',records:'records',shrines:'shrines'}[p.c]||'basics'};
+function say(txt){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='ja-JP';u.rate=.85;const v=s.getVoices().find(v=>/^ja/i.test(v.lang));if(v)u.voice=v;s.speak(u)}catch(e){}}
+const SPK='<svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="var(--fg)" d="M0 3h2v2H0z M2 2h1v4H2z M3 1h1v6H3z"/><path fill="var(--acc)" d="M5 2h1v1H5z M6 3h1v2H6z M5 5h1v1H5z"/></svg>';
+const SHW='<svg width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="var(--bg)" d="M0 0h3v1H1v2H0z M5 0h3v3H7V1H5z M0 5h1v2h2v1H0z M7 5h1v3H5V7h2z"/></svg>';
+function phrases(cat){sfx('open');cat=PH[cat]?cat:(PH[st.phc]?st.phc:'basics');st.phc=cat;save();const g=PH[cat];
+  openSh(`<div class="row2" style="margin-top:0"><span class="st" style="margin:0">phrases <span style="color:var(--gold)">言葉</span></span><span class="dt">tap a phrase to show it</span></div>
+    <div class="phch">${Object.entries(PH).map(([k,v])=>`<button data-c="${k}" class="${k===cat?'on':''}" style="${k===cat?`background:${v.c};border-color:${v.c}`:''}"><i style="background:${v.c}"></i>${esc(v.n)}</button>`).join('')}</div>
+    <div class="phh"><span style="color:${g.c}">${esc(g.n)} · ${g.k}</span><span class="dt">${g.l.length} phrases</span></div>
+    ${g.l.map((x,i)=>`<div class="phr"><button class="tx" data-s="${i}"><span class="en">${esc(x[0])}</span><span class="ja">${x[1]}</span><span class="ro">${esc(x[2])}</span></button><button class="phb" data-p="${i}" aria-label="Play it out loud">${SPK}</button><button class="phb shw" data-s="${i}" aria-label="Show to staff">${SHW}</button></div>`).join('')}
+    <div class="note">“play” uses your phone’s japanese voice · works offline</div>`);
+  sh.onclick=e=>{const c=e.target.closest('[data-c]');if(c){sfx('tap');phrases(c.dataset.c);return}
+    const pl=e.target.closest('[data-p]');if(pl){say(g.l[+pl.dataset.p][1]);return}
+    const s=e.target.closest('[data-s]');if(s)phShow(cat,+s.dataset.s)}}
+let phWL=null;
+function phShow(cat,i){const g=PH[cat];let o=document.getElementById('phshow');if(!o){o=document.createElement('div');o.id='phshow';o.className='phshow';app.appendChild(o)}
+  sfx('pop');try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>phWL=w).catch(()=>{})}catch(e){}
+  const draw=()=>{const x=g.l[i],pre=/[か]？$|ください|お願いします|いいですか/.test(x[1])&&!/^すみません/.test(x[1]);
+    o.innerHTML=`<div class="top"><span><span style="color:${g.c}">■</span> ${esc(g.n)}</span><button id="phx">close ✕</button></div>
+      <div class="phcard"><div class="pre">${pre?'すみません、':'&nbsp;'}</div><div class="big2">${x[1]}</div><div class="low"><span>${esc(x[0])}</span><em>${esc(x[2])}</em></div></div>
+      <div class="phnav"><button id="php">◀ prev</button><button class="say" id="phs">▶ say it</button><button id="phn">next ▶</button></div>
+      <div class="ft">${i+1} / ${g.l.length} · screen stays bright while open</div>`;
+    $('phx').onclick=()=>{sfx('tap');o.remove();try{phWL&&phWL.release()}catch(e){}phWL=null};
+    $('phs').onclick=()=>say((pre?'すみません、':'')+x[1]);
+    $('php').onclick=()=>{i=(i+g.l.length-1)%g.l.length;sfx('tap');draw()};$('phn').onclick=()=>{i=(i+1)%g.l.length;sfx('tap');draw()}};
+  draw()}
+$('bphr').onclick=()=>phrases();
 function stampBook(){sfx('open');const all=allSpots().filter(p=>p.c!=='loo'),done=all.filter(p=>st.stamps[p.id]).sort((a,b)=>st.stamps[a.id]<st.stamps[b.id]?-1:1),n=all.length,seg=Math.min(n,40),on=done.length?Math.max(1,Math.round(done.length/Math.max(1,n)*seg)):0;
   openSh(`<div class="row2" style="margin-top:0"><span class="st" style="margin:0">stamp book</span><span class="dt">${done.length} of ${n}</span></div>
     <div class="prog" style="grid-template-columns:repeat(${seg},1fr)">${Array.from({length:seg},(_,i)=>`<i style="${i<on?'background:var(--gold)':''}"></i>`).join('')}</div>
