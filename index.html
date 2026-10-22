@@ -348,7 +348,7 @@ function strokePix(x,pts){for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[
 function rainLoop(){const cv=$('rain');rainRAF=requestAnimationFrame(rainLoop);if(document.hidden||st.view!=='map')return;
   const PX=2,cw=Math.ceil(MAP.clientWidth/PX),ch=Math.ceil(MAP.clientHeight/PX);if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
   const x=cv.getContext('2d');x.clearRect(0,0,cw,ch);
-  const dark=st.map==='night',storm=wxMode==='storm',driz=wxMode==='drizzle';
+  const dark=mapT()==='night',storm=wxMode==='storm',driz=wxMode==='drizzle';
   const drop=dark?'rgba(205,224,248,.75)':'rgba(58,84,128,.72)',drop2=dark?'rgba(205,224,248,.4)':'rgba(58,84,128,.38)';
   const n=driz?60:storm?210:150;
   while(drops.length<n)drops.push({x:Math.random()*(cw+40),y:Math.random()*ch-ch*.3,e:Math.random()*ch,v:(driz?2.2:3.4)+Math.random()*1.6,l:driz?3:5+Math.floor(Math.random()*4),far:Math.random()<.35});
@@ -412,8 +412,13 @@ $('q').oninput=e=>{q=e.target.value;refresh()};
 /* ---------- map ---------- */
 const MAP=$('map'),MV=$('mv'),IMG=$('mimg'),PINS=$('pins'),LBL=$('lbl'),MC=$('mcv'),MCX=MC.getContext('2d');let LBLM=null,LBLS=[],selLm=-1;
 const THEMES={washi:'#8EC1D6',kinari:'#9DB5BC',moss:'#5D99A8',sumi:'#97A3AA',night:'#16294D'};
-if(!THEMES[st.map]||!st.mapPicked||st.mapV!==4){st.map='washi';st.mapV=4}
-function setMap(){MAP.style.background=THEMES[st.map];IMG.src='maps/'+st.map+'.png'}
+if(!(THEMES[st.map]||st.map==='auto')||st.mapV!==5){st.map='auto';st.mapV=5}
+/* auto: washi while the sun is up in tokyo, night after sunset */
+function sunUp(t){const r=Math.PI/180,lat=35.68,lng=139.69,J=t/864e5+2440587.5,n0=Math.ceil(J-2451545+0.0008);  for(let n=n0-1;n<=n0+1;n++){const Js=n-lng/360,M=(357.5291+0.98560028*Js)%360,C=1.9148*Math.sin(M*r)+0.02*Math.sin(2*M*r)+0.0003*Math.sin(3*M*r),L=(M+C+282.9372)%360,    Jt=2451545+Js+0.0053*Math.sin(M*r)-0.0069*Math.sin(2*L*r),sd=Math.sin(L*r)*Math.sin(23.4397*r),cd=Math.cos(Math.asin(sd)),    w=Math.acos((Math.sin(-0.833*r)-Math.sin(lat*r)*sd)/(Math.cos(lat*r)*cd))/r,rise=(Jt-w/360-2440587.5)*864e5,set=(Jt+w/360-2440587.5)*864e5;    if(t>=rise&&t<set)return true}return false}
+const mapT=()=>st.map==='auto'?(sunUp(Date.now())?'washi':'night'):st.map;
+let MAPNOW='';
+function setMap(){const m=mapT();MAPNOW=m;MAP.style.background=THEMES[m];IMG.src='maps/'+m+'.png'}
+setInterval(()=>{if(st.map==='auto'&&mapT()!==MAPNOW)setMap()},60000);
 const toM=(lat,lng)=>[(lng-PJ.LNG0)*PJ.KX,(PJ.LAT1-lat)*PJ.KY];
 const toP=(lat,lng)=>{const [x,y]=toM(lat,lng);return[Math.max(12,Math.min(PJ.W-12,x)),Math.max(28,Math.min(PJ.H-6,y))]};
 const toLL=(x,y)=>({lng:PJ.LNG0+x/PJ.KX,lat:PJ.LAT1-y/PJ.KY});
@@ -459,7 +464,7 @@ let homeEl=null;
 function draw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
   const w=MAP.clientWidth,h=MAP.clientHeight,dpr=Math.min(3,window.devicePixelRatio||1),cw=Math.round(w*dpr),ch=Math.round(h*dpr);
   if(MC.width!==cw||MC.height!==ch){MC.width=cw;MC.height=ch}
-  MCX.imageSmoothingEnabled=false;MCX.fillStyle=THEMES[st.map]||'#000';MCX.fillRect(0,0,cw,ch);
+  MCX.imageSmoothingEnabled=false;MCX.fillStyle=THEMES[mapT()]||'#000';MCX.fillRect(0,0,cw,ch);
   if(IMG.complete&&IMG.naturalWidth)MCX.drawImage(IMG,-tx/s,-ty/s,w/s,h/s,0,0,cw,ch);
   syncMarks();
   for(const m of marks){const x=tx+m.mx*s,y=ty+m.my*s,on=x>-40&&x<w+40&&y>-40&&y<h+60;if(m.on!==on){m.e.style.display=on?'':'none';m.on=on;m.e._on=on}if(on)m.e.style.transform=`translate3d(${x|0}px,${y|0}px,0)`}
@@ -588,7 +593,7 @@ function wikiAll(){if(WALL)return WALL;const names=Object.keys(WIKI).filter(n=>!
       Object.keys(WIKI).forEach(n=>{if(!(n in WIMG)){const u=res(WIKI[n]);if(u||byT.hasOwnProperty(WIKI[n])||fw[WIKI[n]])map[n]=u}})});
     Object.assign(WIMG,map);if(any)try{localStorage.setItem('tokyoexe.wimg2',JSON.stringify(WIMG))}catch(e){}if(!any)WALL=null;return WIMG})}
 function wikiImg(n){if(!WIKI[n])return Promise.resolve(null);if(n in WIMG)return Promise.resolve(WIMG[n]||null);return wikiAll().then(m=>m[n]||null).catch(()=>null)}
-function lmThumb(cv,l){const [mx,my]=toM(l[2],l[1]),h=(l[4]||6),sz=Math.max(18,h+8),c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle=THEMES[st.map]||'#000';c.fillRect(0,0,cv.width,cv.height);
+function lmThumb(cv,l){const [mx,my]=toM(l[2],l[1]),h=(l[4]||6),sz=Math.max(18,h+8),c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle=THEMES[mapT()]||'#000';c.fillRect(0,0,cv.width,cv.height);
   if(IMG.complete&&IMG.naturalWidth)c.drawImage(IMG,mx-sz/2,my-h/2-sz/2-1,sz,sz,0,0,cv.width,cv.height)}
 const LMG={};'swan boats|kiyosumi garden|todoroki valley|tropical dome|hamarikyu|hanegi plum grove|zenpukuji park|shakujii park|senzoku pond|himonya park|roka koshun-en|jindai botanical gardens|saigoyama park|nature study forest|kyu-furukawa gardens|koishikawa korakuen|mukojima hyakkaen|jingu gaien ginkgo avenue|chinzanso garden|tamagawa josui greenway|rikugien|shinjuku gyoen|chikurin park|suzume-no-oyado|jidayubori park|tonogayato (off map ←)|otaguro park|wadabori park|kitazawa river greenway|rinshi-no-mori|kyu-yasuda garden|otonashi shinsui park|kaze-no-sanpomichi (to ghibli)|mejiro garden|mt fuji (far away)|ueno zoo|sakurabashi'.split('|').forEach(n=>LMG[n]='nature');'meiji jingu|senso-ji|gotokuji (cat temple)|yoyogi hachimangu|tomioka hachimangu|kameido tenjin|nezu torii tunnel|zojoji + jizo|hanazono inari|hatonomori hachiman|shinagawa shrine|oji inari|toyokawa inari|hie shrine|sumo ring shrine|kuhonbutsu ginkgo|tamagawa daishi tunnel|omiya hachimangu|inokashira benzaiten|weather shrine|gohyaku rakanji|meguro fudoson|kishimojin|yushima tenjin|kanda myojin|atago steps of success|sengakuji|ueno toshogu|shinobazu bentendo|okusawa shrine'.split('|').forEach(n=>LMG[n]='shrines');'kappabashi chef|electric town|tsukiji market|koenji live houses|denkiyu sento|yanaka cats|nakano broadway|takeshita street|tsukishima monja|golden gai|omoide yokocho|ameyoko|jimbocho books|bonus track|yanaka ginza steps|toden arakawa|nishi-ogikubo antiques|harmonica yokocho|kyu asakura house|sugamo jizo-dori|nippori fabric town|nihonbashi + kirin|hyogo yokocho|nonbei yokocho|tsukuda|toyosu market|shibamata (off map →)|kabukicho'.split('|').forEach(n=>LMG[n]='streets');
 const LMGN={all:'all',nature:'nature',shrines:'shrines + temples',streets:'old streets',city:'city + museums'};
@@ -762,9 +767,9 @@ function stampBook(){sfx('open');const all=allSpots().filter(p=>p.c!=='loo'),don
   openSh(`<div class="row2" style="margin-top:0"><span class="st" style="margin:0">stamp book</span><span class="dt">${done.length} of ${n}</span></div>
     <div class="prog" style="grid-template-columns:repeat(${seg},1fr)">${Array.from({length:seg},(_,i)=>`<i style="${i<on?'background:var(--gold)':''}"></i>`).join('')}</div>
     ${done.length?(()=>{const days=[...new Set(done.map(p=>st.stamps[p.id]))];return days.map(d=>{const dn=Math.round((Date.parse(d)-Date.parse('2026-10-28'))/864e5)+1,ps=done.map((p,i)=>[p,i]).filter(([p])=>st.stamps[p.id]===d);return `<div class="dayh"><span class="st" style="margin:0">${dn>=1&&dn<=27?'day '+dn:'before the trip'}</span><span class="dt">${dlong(d)} · ${ps.length} stamp${ps.length>1?'s':''}</span></div><div class="sgrid" style="margin-top:14px">${ps.map(([p,i])=>{const c=CATS[p.c]||CATS.sights;return `<button class="stamp" data-i="${i}"><div class="ring" style="border-color:${c.c};color:${c.c};transform:rotate(${(i*37%15)-7}deg)">${c.k}<small>${dlong(st.stamps[p.id]).replace(/^\w+ /,'')}</small></div><span>${esc(p.n)}</span></button>`}).join('')}</div>`}).join('')})():`<div class="dt empty">no stamps yet<br>open a spot and tap “stamp”<br>when you’ve been</div>`}
-    <div class="row2" style="margin-top:24px"><button class="dt" id="snd">sound · ${st.snd?'on':'off'}</button><button class="dt" id="mapb">map · ${st.map}</button><button class="dt" id="syb">sync · ${me?'on':'off'}</button></div>`);
+    <div class="row2" style="margin-top:24px"><button class="dt" id="snd">sound · ${st.snd?'on':'off'}</button><button class="dt" id="mapb">map · ${st.map==='auto'?'auto ('+mapT()+')':st.map}</button><button class="dt" id="syb">sync · ${me?'on':'off'}</button></div>`);
   sh.querySelectorAll('.stamp').forEach(b=>b.onclick=()=>{const p=done[+b.dataset.i];shut();setTimeout(()=>{if(st.view!=='map'){st.view='map';refresh()}select(p,true);spotSheet(p)},250)});
-  $('mapb').onclick=()=>{const k=Object.keys(THEMES);st.map=k[(k.indexOf(st.map)+1)%k.length];st.mapPicked=1;save();setMap();$('mapb').textContent='map · '+st.map;sfx('tap')};
+  $('mapb').onclick=()=>{const k=['auto'].concat(Object.keys(THEMES));st.map=k[(k.indexOf(st.map)+1)%k.length];st.mapPicked=1;save();setMap();$('mapb').textContent='map · '+(st.map==='auto'?'auto ('+mapT()+')':st.map);sfx('tap')};
   $('snd').onclick=()=>{st.snd=!st.snd;save();$('snd').textContent='sound · '+(st.snd?'on':'off');sfx('tap')};$('syb').onclick=syncSheet}
 $('bstamp').onclick=stampBook;
 function longPress(x,y){const mx=(x-MAP.getBoundingClientRect().left-tx)/s,my=(y-MAP.getBoundingClientRect().top-ty)/s;if(mx<0||my<0||mx>PJ.W||my>PJ.H)return;const ll=toLL(mx,my);sfx('pop');addForm(ll.lat,ll.lng,{},'dropped where you pressed')}
