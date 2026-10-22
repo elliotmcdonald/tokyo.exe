@@ -225,13 +225,13 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* ---------- data ---------- */
 const SPOTS=/*SPOTS*/;
 const ICONS=/*ICONS*/;
-const CATICON={events:'lantern',coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle',film:'film',loo:'toilet'};
+const CATICON={events:'lantern',cosy:'lantern',coffee:'coffee',eat:'onigiri',markets:'tag',thrift:'tee',records:'record',jazz:'jazz',bars:'cocktail',craft:'lamp',shops:'bag',shrines:'torii',sights:'sparkle',film:'film',loo:'toilet'};
 const icOf=p=>ICONS[p.ic]||ICONS[CATICON[p.c]]||ICONS.sparkle;
 const PJ={W:944,H:659,LNG0:139.515,LAT1:35.775,KX:2817.621126910331,KY:3468.75};
 const HOME={lat:35.6707238,lng:139.6710513};
 const TRIP0='2026-10-28',TRIP1='2026-11-23';
 const CATS={coffee:{n:'coffee & tea',c:'#C08A5F',k:'珈琲'},eat:{n:'ramen & food',c:'#E5583F',k:'麺'},markets:{n:'flea & antiques',c:'#E8B547',k:'市'},thrift:{n:'thrift',c:'#F29A5B',k:'古'},
-  records:{n:'records',c:'#E77FB0',k:'盤'},jazz:{n:'jazz kissa',c:'#9A8AF2',k:'音'},bars:{n:'bars',c:'#5FC2D9',k:'酒'},craft:{n:'design & craft',c:'#3FB5AA',k:'器'},
+  records:{n:'records',c:'#E77FB0',k:'盤'},jazz:{n:'jazz kissa',c:'#9A8AF2',k:'音'},bars:{n:'bars',c:'#5FC2D9',k:'酒'},cosy:{n:'cosy spots',c:'#D9A6F2',k:'灯'},craft:{n:'design & craft',c:'#3FB5AA',k:'器'},
   shops:{n:'shops',c:'#8FA3FF',k:'店'},shrines:{n:'shrines & temples',c:'#F2E4EA',k:'社'},film:{n:'perfect days',c:'#E8B547',k:'映'},loo:{n:'free toilets',c:'#8CC4E8',k:'WC'},sights:{n:'sights & parks',c:'#B5E06A',k:'景'},events:{n:'festivals & events',c:'#F2786B',k:'祭'}};
 SPOTS.forEach(p=>{if(p.c==='gardens')p.c='sights'});
 const LABELS=[['shinjuku',139.70038,35.69018,1],['shibuya',139.70149,35.65796,1],['ikebukuro',139.71094,35.7299,1],['ueno',139.77676,35.71351,1],['tokyo stn',139.76704,35.6813,1],['asakusa',139.797774,35.710746,1],['kichijoji',139.57984,35.70295,1],['shimokitazawa',139.66657,35.6616,1],['nakameguro',139.699116,35.64431,1],['ginza',139.765366,35.6715,1],['akihabara',139.77288,35.69824,1],['koenji',139.64955,35.70518,1],
@@ -299,7 +299,7 @@ const pm=s=>{const [h,m]=s.split(':').map(Number);return h*60+(m||0)};
 const fm=m=>{m=((m%1440)+1440)%1440;return `${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`};
 const ranges=s=>!s?[]:s.split(',').map(r=>{const [a,b]=r.split('-');let x=pm(a),y=pm(b);if(y<=x)y+=1440;return[x,y]});
 let TODAY='';const dayNow=()=>TODAY||(TODAY=tnow().iso);setInterval(()=>{TODAY=''},60000);
-const INDOOR_C=new Set(['coffee','eat','thrift','craft','shops','records','bars','jazz','film','loo']);
+const INDOOR_C=new Set(['coffee','eat','cosy','thrift','craft','shops','records','bars','jazz','film','loo']);
 const INDOOR_N=new Set(['ghibli museum','gashapon department store','nakano broadway','tokyo skytree','ad museum tokyo','asakusa underground street','tocho observation deck','shibuya fureai botanical center','urban base camp shinjuku','sumida hokusai museum','nezu museum']);
 const indoor=p=>INDOOR_C.has(p.c)||INDOOR_N.has((p.n||'').toLowerCase());
 const dlong=iso=>{const [y,m,d]=iso.split('-').map(Number);const dt=new Date(Date.UTC(y,m-1,d));return dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).toLowerCase().replace(',','')};
